@@ -1,6 +1,6 @@
 ; Bù Nhìn - nhân vật làm bao cát cho LAB (phòng luyện tập)
 ; Không có đòn đánh. Hành vi (đứng/ngồi/nhảy/đỡ đòn...) chỉnh trong menu tạm dừng của Training.
-; Hình: sprite Kung Fu Man đổi màu rơm (sinh bằng tools/gen_bunhin.py).
+; Hình: model test màu rơm (sinh bằng tools/gen_model.py ... --no-moves).
 
 [Info]
 name = "Bu Nhin"
@@ -9,7 +9,7 @@ versiondate = 11,22,2026
 mugenversion = 1.0
 author = "MugenFake"
 pal.defaults = 1
-localcoord = 320,240
+localcoord = 640,360
 
 [Files]
 cmd      = bunhin.cmd

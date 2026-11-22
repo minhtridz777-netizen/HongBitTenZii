@@ -1,0 +1,444 @@
+; ============================================================================
+; KHUNG.CNS - CƠ CHẾ CHUNG cho mọi nhân vật (designs/KHUNG_CHUAN.md mục 3)
+; KHÔNG copy file này. Mỗi nhân vật trỏ tới nó trong file .def:
+;     st2 = ../../shared/char_template/khung.cns
+; Sửa ở đây = áp dụng cho mọi nhân vật.
+;
+; Yêu cầu trong file .cmd của nhân vật (có sẵn trong mẫu mau.cmd):
+;   "K" "L" "down_L" "back_L" "walkfwd" "walkback" "press_back"
+;   "holddown" (giữ S) và "holdback" ĐƯỢC GÁN = giữ S (để engine đỡ đòn bằng S).
+;
+; Biến hệ thống dùng ở đây:
+;   var(0) = đã lướt trên không trong lần nhảy này | var(1) = đã nhảy đôi
+;
+; State trong file: 20 (đi), 40 (bắt đầu nhảy), 700/705/710/720 (lướt, nhảy đôi),
+;                   800 (giữ S - thế đỡ), 860/865 (thoát combo S+L)
+; Thể lực = guard points của engine (thanh dưới thanh máu), tối đa 1000:
+;   lướt -250 | đỡ trúng: engine trừ theo sát thương | hồi khi không đỡ | hết khi đỡ -> vỡ thế (engine)
+; ============================================================================
+
+[Statedef -3]
+
+; --- Tắt phím cứng kiểu Mugen: nhảy bằng W, cúi, đi/đứng tự động, đỡ khi ngồi/trên không ---
+[State -3, Tat phim cung]
+type = AssertSpecial
+trigger1 = 1
+flag = NoJump
+flag2 = NoAirJump
+flag3 = NoCrouch
+flag4 = NoWalk
+flag5 = NoBrake
+flag6 = NoCrouchGuard
+flag7 = NoAirGuard
+ignorehitpause = 1
+
+; Đối thủ ở sau lưng -> không đỡ được (chỉ đỡ đòn phía trước mặt)
+[State -3, Khong do sau lung]
+type = AssertSpecial
+trigger1 = P2Dist X < 0
+flag = NoStandGuard
+ignorehitpause = 1
+
+; Đang giữ S (thế đỡ 800 / đang chặn đòn 120-155) và đối thủ ở phía trước -> engine tự đỡ
+; (engine không đỡ theo lệnh "holdback" gán lại, nên dùng cờ AutoGuard)
+[State -3, Do bang S]
+type = AssertSpecial
+triggerall = command = "holddown" && P2Dist X >= 0
+trigger1 = stateno = 800
+trigger2 = stateno = [120,155]
+trigger3 = stateno = [10,12]
+flag = AutoGuard
+ignorehitpause = 1
+
+; Giữ S: không tự quay mặt (A/D để quay hướng đỡ)
+[State -3, Giu huong khi do]
+type = AssertSpecial
+trigger1 = command = "holddown" && statetype != A
+flag = NoAutoTurn
+
+; Đang đỡ (giữ S hoặc đang chặn đòn) -> thể lực không hồi
+[State -3, Do thi khong hoi the luc]
+type = MapSet
+trigger1 = stateno = 800 || (stateno = [120,155])
+map = "_iksys_guardPointsTimer"
+value = 60
+ignorehitpause = 1
+
+; Chạm đất -> được lướt trên không / nhảy đôi lại
+[State -3, Reset tren khong]
+type = VarSet
+trigger1 = statetype != A
+var(0) = 0
+
+[State -3, Reset nhay doi]
+type = VarSet
+trigger1 = statetype != A
+var(1) = 0
+
+; ---------------- THOÁT COMBO: S + L khi đang trúng đòn, tốn 1 thanh ----------------
+[State -3, Thoat combo]
+type = ChangeState
+triggerall = command = "down_L"
+triggerall = movetype = H && power >= 1000
+triggerall = stateno != [120,155] && stateno != [5110,5199]
+trigger1 = 1
+value = 860
+ignorehitpause = 1
+
+; ---------------- DI CHUYỂN ----------------
+; Giữ S trên mặt đất -> thế đỡ (kể cả khi engine tự cho ngồi sau khi đỡ xong: state 10-12)
+[State -3, The do]
+type = ChangeState
+triggerall = command = "holddown" && ctrl
+trigger1 = statetype = S && (stateno = 0 || stateno = 20 || stateno = 52)
+trigger2 = stateno = [10,12]
+value = 800
+
+; Game không có cúi người: lỡ vào state ngồi mà không giữ S -> đứng dậy
+[State -3, Khong ngoi]
+type = ChangeState
+trigger1 = (stateno = [10,12]) && ctrl && command != "holddown"
+value = 0
+
+; Nhảy đôi: K khi đang bay
+[State -3, Nhay doi]
+type = ChangeState
+triggerall = command = "K" && statetype = A && ctrl && var(1) = 0
+trigger1 = stateno = [41,51] || stateno = 710 || stateno = 52
+trigger2 = stateno = [600,699] && movecontact
+value = 720
+
+; Lướt trên không: L khi đang bay (1 lần mỗi lần nhảy), tốn thể lực
+[State -3, Luot tren khong]
+type = ChangeState
+triggerall = command = "L" && statetype = A && ctrl && var(0) = 0
+triggerall = guardpoints >= 250 && pos y < -12
+trigger1 = 1
+value = 710
+
+; Lướt lùi (A + L) / lướt tới (L) trên mặt đất, tốn thể lực
+[State -3, Luot lui]
+type = ChangeState
+triggerall = command = "back_L" && statetype = S && ctrl && command != "holddown"
+triggerall = guardpoints >= 250
+trigger1 = 1
+value = 705
+
+[State -3, Luot toi]
+type = ChangeState
+triggerall = command = "L" && statetype = S && ctrl && command != "holddown"
+triggerall = guardpoints >= 250
+trigger1 = 1
+value = 700
+
+; Nhảy: K trên mặt đất (không giữ S - giữ S + K là xuống bậc, xem shared/system/platforms.zss)
+[State -3, Nhay]
+type = ChangeState
+triggerall = command = "K" && command != "holddown"
+trigger1 = statetype = S && ctrl
+trigger2 = stateno = 700 && time >= 2
+value = 40
+
+; Đi: A / D
+[State -3, Di]
+type = ChangeState
+triggerall = command = "walkfwd" || command = "walkback"
+triggerall = command != "holddown"
+trigger1 = stateno = 0 && ctrl
+value = 20
+
+;---------------------------------------------------------------------------
+; Đi (thay state 20 của engine vì "holdback" đã được gán cho S)
+[Statedef 20]
+type = S
+physics = S
+sprpriority = 0
+
+[State 20, Toi]
+type = VelSet
+trigger1 = command = "walkfwd"
+x = const(velocity.walk.fwd.x)
+
+[State 20, Lui]
+type = VelSet
+trigger1 = command = "walkback" && command != "walkfwd"
+x = const(velocity.walk.back.x)
+
+[State 20, Anim toi]
+type = ChangeAnim
+trigger1 = vel x > 0 && anim != 20
+value = 20
+
+[State 20, Anim lui]
+type = ChangeAnim
+trigger1 = vel x < 0 && anim != 21
+value = 21
+
+[State 20, Dung lai]
+type = ChangeState
+trigger1 = command != "walkfwd" && command != "walkback"
+value = 0
+
+;---------------------------------------------------------------------------
+; Bắt đầu nhảy (thay state 40: hướng nhảy theo A/D)
+[Statedef 40]
+type = S
+physics = S
+anim = 40
+ctrl = 0
+sprpriority = 1
+facep2 = 1
+
+[State 40, Huong]
+type = VarSet
+trigger1 = Time = 0
+sysvar(1) = ifelse(command = "walkfwd", 1, ifelse(command = "walkback", -1, 0))
+
+[State 40, Bay]
+type = VelSet
+trigger1 = AnimTime = 0
+x = ifelse(sysvar(1) = 1, ifelse(prevstateno = 700, const(velocity.runjump.fwd.x), const(velocity.jump.fwd.x)), ifelse(sysvar(1) = -1, const(velocity.jump.back.x), const(velocity.jump.neu.x)))
+y = const(velocity.jump.y)
+
+[State 40, Len]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; L - lướt tới
+[Statedef 700]
+type = S
+movetype = I
+physics = S
+ctrl = 0
+anim = 700
+sprpriority = 1
+
+[State 700, The luc]
+type = GuardPointsAdd
+trigger1 = Time = 0
+value = -250
+absolute = 1
+
+[State 700, Toc do]
+type = VelSet
+trigger1 = Time <= 11
+x = const(velocity.run.fwd.x)
+
+[State 700, Bui]
+type = Explod
+trigger1 = Time = 0
+anim = 8020
+pos = -10, 0
+postype = p1
+facing = -1
+bindtime = 1
+removetime = -2
+sprpriority = 1
+ownpal = 1
+trans = add
+
+[State 700, Het]
+type = ChangeState
+trigger1 = Time >= 16
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; A + L - lướt lùi (nhảy lùi ngắn, vài tick bất tử)
+[Statedef 705]
+type = A
+movetype = I
+physics = A
+ctrl = 0
+anim = 705
+sprpriority = 1
+
+[State 705, The luc]
+type = GuardPointsAdd
+trigger1 = Time = 0
+value = -250
+absolute = 1
+
+[State 705, Toc do]
+type = VelSet
+trigger1 = Time = 0
+x = const(velocity.run.back.x)
+y = const(velocity.run.back.y)
+
+[State 705, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 6
+
+[State 705, Tiep dat]
+type = ChangeState
+trigger1 = Vel Y > 0 && Pos Y >= 0
+value = 52
+
+;---------------------------------------------------------------------------
+; L trên không - lướt ngang
+[Statedef 710]
+type = A
+movetype = I
+physics = N
+ctrl = 0
+anim = 710
+sprpriority = 1
+
+[State 710, Danh dau]
+type = VarSet
+trigger1 = Time = 0
+var(0) = 1
+
+[State 710, The luc]
+type = GuardPointsAdd
+trigger1 = Time = 0
+value = -250
+absolute = 1
+
+[State 710, Huong]
+type = Turn
+trigger1 = Time = 0 && command = "walkback"
+
+[State 710, Toc do]
+type = VelSet
+trigger1 = Time <= 10
+x = const(velocity.run.fwd.x)
+y = 0
+
+[State 710, Het]
+type = ChangeState
+trigger1 = Time >= 14
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; K trên không - nhảy đôi
+[Statedef 720]
+type = A
+movetype = I
+physics = A
+ctrl = 1
+anim = 720
+sprpriority = 1
+
+[State 720, Danh dau]
+type = VarSet
+trigger1 = Time = 0
+var(1) = 1
+
+[State 720, Bay]
+type = VelSet
+trigger1 = Time = 0
+x = ifelse(command = "walkfwd", const(velocity.airjump.fwd.x), ifelse(command = "walkback", const(velocity.airjump.back.x), 0))
+y = const(velocity.airjump.y)
+
+;---------------------------------------------------------------------------
+; Giữ S - thế đỡ: đứng yên, A/D quay hướng đỡ. Engine tự chuyển sang 120-155 khi chặn đòn.
+[Statedef 800]
+type = S
+movetype = I
+physics = S
+ctrl = 1
+anim = 800
+velset = 0,0
+sprpriority = 0
+
+[State 800, Quay huong]
+type = Turn
+trigger1 = command = "press_back"
+
+[State 800, Thoi do]
+type = ChangeState
+trigger1 = command != "holddown"
+value = 0
+
+;---------------------------------------------------------------------------
+; S + L - thoát combo: biến mất, hiện ra sau lưng đối thủ (mẫu - mỗi tướng tự đổi hình thức ở state riêng)
+[Statedef 860]
+type = A
+movetype = I
+physics = N
+ctrl = 0
+anim = 860
+velset = 0,0
+sprpriority = 2
+
+[State 860, Ton nang luong]
+type = PowerAdd
+trigger1 = Time = 0
+value = -1000
+
+[State 860, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 30
+
+[State 860, Khong nga]
+type = HitFallSet
+trigger1 = Time = 0
+value = 0
+
+[State 860, Khoi]
+type = Explod
+trigger1 = Time = 0
+anim = 8300
+pos = 0, -35
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+ignorehitpause = 1
+
+[State 860, Ra sau lung]
+type = PosAdd
+trigger1 = Time = 8
+x = P2Dist X + 40
+
+[State 860, Quay mat]
+type = Turn
+trigger1 = Time = 8
+
+[State 860, Hien ra]
+type = ChangeState
+trigger1 = Time >= 9
+value = 865
+
+[Statedef 865]
+type = A
+movetype = I
+physics = N
+ctrl = 0
+anim = 865
+velset = 0,0
+
+[State 865, Khoi]
+type = Explod
+trigger1 = Time = 0
+anim = 8300
+pos = 0, -35
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 865, Roi]
+type = ChangeState
+trigger1 = Time >= 6 && Pos Y < -2
+value = 50
+ctrl = 1
+
+[State 865, Dung]
+type = ChangeState
+trigger1 = Time >= 6
+value = 0
+ctrl = 1

@@ -9,35 +9,35 @@ author = "MugenFake"
 
 [Constants]
 plat.count = 6
-plat1.x1 = -300
-plat1.x2 = -210
-plat1.y = -28
-plat2.x1 = -190
-plat2.x2 = -90
-plat2.y = -56
-plat3.x1 = -50
-plat3.x2 = 30
-plat3.y = -88
-plat4.x1 = 60
-plat4.x2 = 160
-plat4.y = -40
-plat5.x1 = 190
-plat5.x2 = 290
-plat5.y = -28
-plat6.x1 = 320
-plat6.x2 = 420
-plat6.y = -60
+plat1.x1 = -600
+plat1.x2 = -420
+plat1.y = -50
+plat2.x1 = -380
+plat2.x2 = -180
+plat2.y = -95
+plat3.x1 = -100
+plat3.x2 = 60
+plat3.y = -140
+plat4.x1 = 120
+plat4.x2 = 320
+plat4.y = -60
+plat5.x1 = 380
+plat5.x2 = 580
+plat5.y = -50
+plat6.x1 = 640
+plat6.x2 = 840
+plat6.y = -100
 
 [Camera]
 startx = 0
 starty = 0
-boundleft = -320
-boundright = 320
-boundhigh = -70
+boundleft = -640
+boundright = 640
+boundhigh = -160
 boundlow = 0
 verticalfollow = .6
 floortension = 20
-tension = 60
+tension = 120
 autocenter = 1
 zoomout = .8
 zoomin = 1
@@ -47,24 +47,24 @@ cuthigh = 0
 cutlow = 0
 
 [PlayerInfo]
-p1startx = 100
+p1startx = -80
 p1starty = 0
 p1facing = 1
-p2startx = 250
-p2starty = -28
+p2startx = 80
+p2starty = 0
 p2facing = -1
-leftbound = -470
-rightbound = 470
+leftbound = -940
+rightbound = 940
 
 [Bound]
-screenleft = 10
-screenright = 10
+screenleft = 20
+screenright = 20
 
 [StageInfo]
-zoffset = 160
+zoffset = 320
 autoturn = 1
 resetBG = 1
-localcoord = 320, 180
+localcoord = 640, 360
 xscale = 1
 yscale = 1
 
@@ -86,7 +86,7 @@ debugbg = 0
 [BG Troi]
 type = normal
 spriteno = 0, 0
-start = 0, -140
+start = 0, -300
 delta = .05, .2
 tile = 1, 0
 
@@ -94,61 +94,61 @@ tile = 1, 0
 type = normal
 mask = 1
 spriteno = 1, 0
-start = -480, 70
+start = -960, 140
 delta = .3, .3
 
 [BG Doi gan]
 type = normal
 mask = 1
 spriteno = 2, 0
-start = -480, 105
+start = -960, 210
 delta = .6, .6
 
 [BG Dat]
 type = normal
 mask = 1
 spriteno = 3, 0
-start = -480, 158
+start = -960, 318
 delta = 1, 1
 
 [BG Bac 1]
 type = normal
 mask = 1
 spriteno = 10, 0
-start = -300, 132
+start = -600, 270
 delta = 1, 1
 
 [BG Bac 2]
 type = normal
 mask = 1
 spriteno = 11, 0
-start = -190, 104
+start = -380, 225
 delta = 1, 1
 
 [BG Bac 3]
 type = normal
 mask = 1
 spriteno = 12, 0
-start = -50, 72
+start = -100, 180
 delta = 1, 1
 
 [BG Bac 4]
 type = normal
 mask = 1
 spriteno = 13, 0
-start = 60, 120
+start = 120, 260
 delta = 1, 1
 
 [BG Bac 5]
 type = normal
 mask = 1
 spriteno = 14, 0
-start = 190, 132
+start = 380, 270
 delta = 1, 1
 
 [BG Bac 6]
 type = normal
 mask = 1
 spriteno = 15, 0
-start = 320, 100
+start = 640, 220
 delta = 1, 1

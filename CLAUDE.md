@@ -18,9 +18,11 @@
 │   ├── TEMPLATE_DESIGN.md     ← mẫu thiết kế nhân vật
 │   └── <TÊN>_DESIGN.md        ← bản thiết kế từng nhân vật (nguồn chuẩn)
 ├── shared/
-│   └── char_template/         ← bộ khung nhân vật dùng chung (tạo sau nhân vật đầu tiên)
+│   ├── char_template/         ← template: khung.cns (cơ chế chung, mọi tướng trỏ tới) + nhân vật mẫu "Mau" (xem README.md)
+│   └── system/platforms.zss   ← code bậc dùng chung (nạp qua save/config.ini)
 ├── chars/<tên>/               ← file nhân vật: .def .cns .cmd .air .sff .snd
-├── chars/bunhin/              ← Bù Nhìn: bao cát cho LAB / chế độ Training (không có đòn)
+├── chars/bunhin/              ← Bù Nhìn: bao cát cho LAB / chế độ Training (model test màu rơm, không có đòn)
+├── stages/lab_bac.def         ← map thử 640×360, rộng 3 màn hình, 6 bậc (map của LAB)
 ├── LAB.exe                    ← phòng luyện tập: mở thẳng màn chọn tướng, đánh Bù Nhìn
 ├── external/mods/lab.lua      ← logic LAB (mod của dự án, chỉ chạy khi có cờ -lab)
 ├── tools/                     ← script Python sinh sprite/animation, chụp màn hình test (xem tools/README.md)
@@ -166,12 +168,12 @@ Chi tiết ở `designs/KHUNG_CHUAN.md` mục 5. Các bước **in đậm** là 
 
 | Nhân vật | Thiết kế | Giai đoạn | Ghi chú |
 |---|---|---|---|
-| Nakroth | `designs/NAKROTH_DESIGN.md` | **Bỏ** – làm theo khung cũ | Sẽ xoá khỏi dự án khi làm template (còn trong lịch sử git) |
+| Mau (mẫu) | `designs/KHUNG_CHUAN.md` | Template chạy trong LAB | Không phải nhân vật chơi – dùng để copy |
 
 ## Lộ trình dự án
 - [x] Chốt phím nhảy (K), LAB, thử bậc + camera (map `lab_bac`)
 - [x] Khung chuẩn (`designs/KHUNG_CHUAN.md`)
-- [ ] Model test (búp bê khớp nối ~70 px) + `shared/char_template/` có đủ cơ chế chung, chạy trong LAB
+- [x] Model test (búp bê khớp nối ~70 px) + `shared/char_template/` có đủ cơ chế chung, chạy trong LAB
 - [ ] Map đầu tiên theo tỉ lệ mới (640×360, có bậc)
 - [ ] Nhân vật đầu tiên theo quy trình mới
 - [ ] Thêm nhân vật 2–4 (dùng template)
@@ -183,12 +185,15 @@ Chi tiết ở `designs/KHUNG_CHUAN.md` mục 5. Các bước **in đậm** là 
 - Engine: IKEMEN GO Stable (`v1.0.0`, build 2026.09.12).
 - Phím nhảy: **Phương án A** – K = nhảy, W chỉ là hướng. Cách làm: mỗi nhân vật đặt
   `AssertSpecial flag = NoJump, flag2 = NoAirJump` trong `[Statedef -2]` của `.cns`, và trong `.cmd`
-  lệnh `"K"` (`command = b`) → `ChangeState 40` khi `statetype = S && ctrl` (xem `chars/nakroth/`).
+  lệnh `"K"` (`command = b`) → `ChangeState 40` (nằm sẵn trong `shared/char_template/khung.cns`).
 - Bàn phím: chỉ 2 bộ phím (xem "Phím điều khiển"). Bản gốc engine dùng mũi tên + Z/X/C, đã đổi trong `save/config.ini`.
 
 ## Ghi chú
 - 60 tick = 1 giây.
+- Nakroth (thiết kế/code cũ) đã xoá theo khung mới; xem lại bằng git nếu cần.
 - Kiểm tra load nhanh (không qua menu): `Ikemen_GO.exe -p1 <tên> -p2 kfm_zss -s stage0 -rounds 1 -windowed -nosound`.
   File nhân vật lỗi → engine thoát ngay với "panic"; chạy tiếp bình thường = load OK.
 - Claude tự xem hình trong game: `python tools/shot.py <tiền tố ảnh> <giây1,giây2,...> -- -lab -loadmotif -p1 <tên> -p2 bunhin -p1.ai 8 -s stage0 -rounds 1 -windowed -nosound`
   (máy tự đánh Bù Nhìn, có bảng LAB, chụp cửa sổ game vào các giây chỉ định). Lưu ảnh vào thư mục tạm, không vào dự án.
+  Thêm `SHOT_KEYS="6:S:2,8:S+I"` để bấm phím cho P1, `LAB_LOG=1` để in log mỗi lần state P1/P2 đổi (kiểm chiêu tự động).
+  Đường dẫn tướng mẫu: `-p1 ../shared/char_template/mau.def`; năng lượng ban đầu: `-p1.power 3000`.

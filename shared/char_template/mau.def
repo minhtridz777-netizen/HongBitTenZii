@@ -1,0 +1,31 @@
+; MẪU - nhân vật mẫu theo designs/KHUNG_CHUAN.md, dùng model test.
+; Tạo nhân vật mới: xem shared/char_template/README.md
+
+[Info]
+name = "Mau"
+displayname = "Mau"
+versiondate = 11,23,2026
+mugenversion = 1.0
+author = "MugenFake"
+pal.defaults = 1,2,3,4
+localcoord = 640,360
+
+[Files]
+cmd      = mau.cmd
+cns      = mau.cns
+st       = mau.cns
+; Cơ chế chung (đỡ, thể lực, lướt, nhảy đôi, thoát combo). Nhân vật trong chars/<tên>/ dùng:
+;   st2 = ../../shared/char_template/khung.cns
+st2      = khung.cns
+stcommon = common1.cns
+sprite   = mau.sff
+anim     = mau.air
+sound    = mau.snd
+
+[Palette Keymap]
+a = 1
+b = 2
+c = 3
+x = 4
+y = 5
+z = 6

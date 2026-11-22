@@ -1,21 +1,21 @@
 """Sinh map thu nghiem 'lab_bac' (stages/lab_bac.def + .sff): rong 3 man hinh, co 6 bac lo lung.
 Chay: python tools/gen_stage_lab.py
-Toa do map: localcoord 320x180, mat dat y = 160 (zoffset). Bac khai bao trong [Constants] (doc boi shared/system/platforms.zss).
+Toa do map: localcoord 640x360, mat dat y = 320 (zoffset). Bac khai bao trong [Constants] (doc boi shared/system/platforms.zss).
 """
 import os, sys, io, struct, random
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw
 from sff2 import read_sff, write_sff
 
-W_LOCAL, H_LOCAL, GROUND = 320, 180, 160
-WORLD_L, WORLD_R = -480, 480
-PLATS = [  # (x1, x2, y)
-    (-300, -210, -28),
-    (-190, -90, -56),
-    (-50, 30, -88),
-    (60, 160, -40),
-    (190, 290, -28),
-    (320, 420, -60),
+W_LOCAL, H_LOCAL, GROUND = 640, 360, 320
+WORLD_L, WORLD_R = -960, 960
+PLATS = [  # (x1, x2, y) - nhay thuong cao ~72, nhay doi ~125
+    (-600, -420, -50),
+    (-380, -180, -95),
+    (-100, 60, -140),
+    (120, 320, -60),
+    (380, 580, -50),
+    (640, 840, -100),
 ]
 
 def to_p8(img):
@@ -33,10 +33,10 @@ def to_p8(img):
     return out, rgba
 
 def sky():
-    im = Image.new('RGBA', (64, 400))
+    im = Image.new('RGBA', (64, 800))
     d = ImageDraw.Draw(im)
-    for y in range(400):
-        k = min(1, max(0, (y - 60) / 260))
+    for y in range(800):
+        k = min(1, max(0, (y - 120) / 520))
         d.line([(0, y), (64, y)], fill=(int(70 + 90 * k), int(130 + 80 * k), int(200 + 40 * k), 255))
     return im
 
@@ -52,10 +52,10 @@ def hills(w, h, col, seed, amp):
     return im
 
 def ground(w):
-    im = Image.new('RGBA', (w, 90))
+    im = Image.new('RGBA', (w, 140))
     d = ImageDraw.Draw(im)
     d.rectangle([0, 0, w, im.height], fill=(110, 78, 50, 255))
-    d.rectangle([0, 0, w, 3], fill=(90, 170, 70, 255))
+    d.rectangle([0, 0, w, 5], fill=(90, 170, 70, 255))
     random.seed(3)
     for _ in range(w // 6):
         x, y = random.randrange(w), random.randrange(5, im.height)
@@ -63,20 +63,20 @@ def ground(w):
     return im
 
 def ledge(w):
-    im = Image.new('RGBA', (w, 12), (0, 0, 0, 0))
+    im = Image.new('RGBA', (w, 18), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    d.rectangle([0, 0, w - 1, 6], fill=(150, 150, 160, 255))      # mat da
-    d.rectangle([0, 0, w - 1, 1], fill=(200, 200, 210, 255))      # vien sang tren
-    d.rectangle([2, 7, w - 3, 9], fill=(90, 90, 100, 255))        # day
-    for x in range(0, w, 14):
-        d.line([(x, 2), (x, 6)], fill=(120, 120, 130, 255))
+    d.rectangle([0, 0, w - 1, 10], fill=(150, 150, 160, 255))     # mat da
+    d.rectangle([0, 0, w - 1, 2], fill=(200, 200, 210, 255))      # vien sang tren
+    d.rectangle([3, 11, w - 4, 14], fill=(90, 90, 100, 255))      # day
+    for x in range(0, w, 24):
+        d.line([(x, 3), (x, 10)], fill=(120, 120, 130, 255), width=2)
     return im
 
 world_w = WORLD_R - WORLD_L
 layers = [  # (group, img, axis_x, axis_y)
     (0, sky(), 0, 0),
-    (1, hills(world_w, 70, (60, 90, 130, 255), 1, 6), 0, 0),
-    (2, hills(world_w, 50, (50, 110, 80, 255), 2, 4), 0, 0),
+    (1, hills(world_w, 140, (60, 90, 130, 255), 1, 10), 0, 0),
+    (2, hills(world_w, 100, (50, 110, 80, 255), 2, 7), 0, 0),
     (3, ground(world_w), 0, 0),
 ]
 for i, (x1, x2, y) in enumerate(PLATS):
@@ -126,11 +126,11 @@ startx = 0
 starty = 0
 boundleft = {WORLD_L + W_LOCAL // 2}
 boundright = {WORLD_R - W_LOCAL // 2}
-boundhigh = -70
+boundhigh = -160
 boundlow = 0
 verticalfollow = .6
 floortension = 20
-tension = 60
+tension = 120
 autocenter = 1
 zoomout = .8
 zoomin = 1
@@ -140,18 +140,18 @@ cuthigh = 0
 cutlow = 0
 
 [PlayerInfo]
-p1startx = 100
+p1startx = -80
 p1starty = 0
 p1facing = 1
-p2startx = 250
-p2starty = -28
+p2startx = 80
+p2starty = 0
 p2facing = -1
-leftbound = {WORLD_L + 10}
-rightbound = {WORLD_R - 10}
+leftbound = {WORLD_L + 20}
+rightbound = {WORLD_R - 20}
 
 [Bound]
-screenleft = 10
-screenright = 10
+screenleft = 20
+screenright = 20
 
 [StageInfo]
 zoffset = {GROUND}
@@ -179,7 +179,7 @@ debugbg = 0
 [BG Troi]
 type = normal
 spriteno = 0, 0
-start = 0, -140
+start = 0, -300
 delta = .05, .2
 tile = 1, 0
 
@@ -187,14 +187,14 @@ tile = 1, 0
 type = normal
 mask = 1
 spriteno = 1, 0
-start = {WORLD_L}, 70
+start = {WORLD_L}, 140
 delta = .3, .3
 
 [BG Doi gan]
 type = normal
 mask = 1
 spriteno = 2, 0
-start = {WORLD_L}, 105
+start = {WORLD_L}, 210
 delta = .6, .6
 
 [BG Dat]

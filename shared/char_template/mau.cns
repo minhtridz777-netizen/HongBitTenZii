@@ -1,0 +1,1093 @@
+; ============================================================================
+; MẪU - chỉ số + bộ chiêu mẫu (designs/KHUNG_CHUAN.md). Cơ chế chung ở khung.cns.
+;
+; ---------------- BẢNG BIẾN ----------------
+; var(0)  - [khung] đã lướt trên không      var(1) - [khung] đã nhảy đôi
+; var(2)  - [.cmd] được hủy sang chiêu U / tuyệt chiêu
+; var(3)-var(9) - để dành cho hệ thống chung
+; var(10)+ - riêng từng tướng (mẫu chưa dùng)
+;
+; ---------------- VỊ TRÍ CHIÊU ----------------
+; 200/210/220 chuỗi J | 240 W+J (hất) | 400 S+J (quét chân) | 600/610 J trên không
+; 1000 U (cầu năng lượng) | 1100 S+U (lướt chém) | 1200 W+U (móc bay lên) | 1300 U trên không (lao xuống)
+; 3000 I (đấm liên hoàn) | 3500-3520 W+I (tia laser) | 4000-4030 S+I (lao + đánh trên không + đập xuống)
+; Đi/nhảy/lướt/đỡ/thoát combo: khung.cns
+; ============================================================================
+
+[Data]
+life = 1000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 2           ; HitDef trong file dùng tia nhỏ S8010 của model test
+guard.sparkno = 40
+KO.echo = 0
+volume = 0
+IntPersistIndex = 60
+FloatPersistIndex = 40
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 8
+ground.front = 9
+air.back = 7
+air.front = 7
+height = 50
+attack.dist = 120
+proj.attack.dist = 200
+proj.doscale = 0
+head.pos = 2, -62
+mid.pos = 0, -40
+shadowoffset = 0
+draw.offset = 0,0
+
+[Velocity]
+walk.fwd  = 2.6
+walk.back = -2.4
+run.fwd  = 8, 0           ; lướt tới (khung.cns dùng run.fwd.x)
+run.back = -5.5,-3.5      ; lướt lùi
+jump.neu = 0,-7.6
+jump.back = -2.6
+jump.fwd = 2.8
+runjump.back = -2.6,-7.6
+runjump.fwd = 4.5,-7.6
+airjump.neu = 0,-6.6      ; nhảy đôi
+airjump.back = -2.4
+airjump.fwd = 2.6
+air.gethit.groundrecover = -.15,-3.5
+air.gethit.airrecover.mul = .5,.2
+air.gethit.airrecover.add = 0,-4.5
+air.gethit.airrecover.back = -1
+air.gethit.airrecover.fwd = 0
+air.gethit.airrecover.up = -2
+air.gethit.airrecover.down = 1.5
+
+[Movement]
+airjump.num = 0
+airjump.height = 35
+yaccel = .40
+stand.friction = .85
+crouch.friction = .82
+stand.friction.threshold = 2
+crouch.friction.threshold = .05
+air.gethit.groundlevel = 25
+air.gethit.groundrecover.ground.threshold = -20
+air.gethit.groundrecover.groundlevel = 10
+air.gethit.airrecover.threshold = -1
+air.gethit.airrecover.yaccel = .35
+air.gethit.trip.groundlevel = 15
+down.bounce.offset = 0, 20
+down.bounce.yaccel = .4
+down.bounce.groundlevel = 12
+down.friction.threshold = .05
+
+[Constants]
+; Thể lực: đỡ trúng đòn mất (sát thương x 2.5) điểm trên 1000 (= sát thương / 4 trên thang 100)
+Default.LifeToGuardPointsMul = 2.5
+Super.LifeToGuardPointsMul = 2.5
+
+; ============================================================================
+; HỆ THỐNG: thua / thắng / xuất hiện
+; ============================================================================
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[Statedef 180]
+type = S
+
+[State 180, Thang]
+type = ChangeState
+trigger1 = Time = 0
+value = 181
+
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, Intro]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, Xong]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+; ============================================================================
+; ĐÁNH THƯỜNG
+; ============================================================================
+; J1 - đấm tay trước | 22
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+juggle = 1
+velset = 0,0
+ctrl = 0
+anim = 200
+poweradd = 15
+sprpriority = 2
+
+[State 200, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, NA
+damage = 22, 0
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 6, 7
+sparkxy = -6, -45
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 5
+ground.hittime = 14
+ground.velocity = -2.5
+air.velocity = -1.4, -3
+air.hittime = 16
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 200, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; J2 - đấm tay sau | 24
+[Statedef 210]
+type = S
+movetype = A
+physics = S
+juggle = 1
+velset = 0,0
+ctrl = 0
+anim = 210
+poweradd = 15
+sprpriority = 2
+
+[State 210, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, NA
+damage = 24, 0
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 6, 7
+sparkxy = -6, -45
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 5
+ground.hittime = 15
+ground.velocity = -2.5
+air.velocity = -1.4, -3
+air.hittime = 16
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 210, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; J3 - đá đẩy lùi | 34
+[Statedef 220]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 220
+poweradd = 25
+sprpriority = 2
+
+[State 220, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, NA
+damage = 34, 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 9
+sparkxy = -6, -40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 10
+ground.hittime = 18
+ground.velocity = -6
+air.velocity = -3, -3
+air.fall = 1
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 220, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; W + J - móc hất lên | 40
+[Statedef 240]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 240
+poweradd = 25
+sprpriority = 2
+
+[State 240, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, NA
+damage = 40, 0
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 9, 10
+sparkxy = -6, -55
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 18
+ground.velocity = -1.5, -8
+air.velocity = -1.5, -7.5
+fall = 1
+fall.recover = 0
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 240, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; S + J - quét chân | 38, đánh ngã
+[Statedef 400]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 400
+poweradd = 25
+sprpriority = 2
+
+[State 400, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, NA
+damage = 38, 0
+animtype = Medium
+guardflag = MA
+hitflag = MAFD
+priority = 4, Hit
+pausetime = 9, 10
+sparkxy = -6, -8
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = Trip
+ground.slidetime = 10
+ground.hittime = 17
+ground.velocity = -1.5, -2
+air.velocity = -1.2, -3
+fall = 1
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 400, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; J trên không - đá chéo | 32
+[Statedef 600]
+type = A
+movetype = A
+physics = A
+juggle = 1
+ctrl = 0
+anim = 600
+poweradd = 15
+sprpriority = 2
+
+[State 600, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, NA
+damage = 32, 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 7, 8
+sparkxy = -6, -30
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 16
+ground.velocity = -3
+air.velocity = -1.5, -3.5
+air.hittime = 18
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 600, Hoi ctrl]
+type = CtrlSet
+trigger1 = AnimElemTime(3) >= 6
+value = 1
+
+; J trên không lần 2 - đấm | 28
+[Statedef 610]
+type = A
+movetype = A
+physics = A
+juggle = 1
+ctrl = 0
+anim = 610
+poweradd = 15
+sprpriority = 2
+
+[State 610, Ham roi]
+type = VelSet
+trigger1 = Time = 0
+y = -2
+
+[State 610, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, NA
+damage = 28, 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 7, 8
+sparkxy = -6, -40
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 16
+ground.velocity = -3
+air.velocity = -2.5, -2
+air.hittime = 18
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 610, Hoi ctrl]
+type = CtrlSet
+trigger1 = AnimElemTime(3) >= 6
+value = 1
+
+; ============================================================================
+; CHIÊU U (mẫu)
+; ============================================================================
+; U - phóng cầu năng lượng | 60
+[Statedef 1000]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 1000
+poweradd = 30
+sprpriority = 2
+
+[State 1000, Chop tay]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 8400
+pos = 34, -42
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+scale = .4, .4
+
+[State 1000, Cau nang luong]
+type = Projectile
+trigger1 = AnimElem = 2
+projid = 1000
+projanim = 8100
+projhitanim = 8110
+projremanim = 8110
+offset = 36, -42
+velocity = 5.5, 0
+projpriority = 1
+projsprpriority = 3
+attr = S, SP
+damage = 60, 4
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+pausetime = 0, 10
+sparkno = -1
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 18
+ground.velocity = -4
+air.velocity = -3, -3
+air.fall = 1
+
+[State 1000, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; S + U - lướt chém trên mặt đất | 70
+[Statedef 1100]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 1100
+poweradd = 30
+sprpriority = 2
+
+[State 1100, Luot]
+type = VelSet
+trigger1 = AnimElem = 2
+x = 8
+
+[State 1100, Danh]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, SA
+damage = 70, 4
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 11
+sparkxy = -6, -45
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 20
+ground.velocity = -6
+air.velocity = -4, -4
+air.fall = 1
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 1100, Vet chem]
+type = Explod
+trigger1 = AnimElem = 3
+anim = 8000
+pos = 30, -48
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+ignorehitpause = 1
+
+[State 1100, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; W + U - móc bay lên | 65, hất
+[Statedef 1200]
+type = A
+movetype = A
+physics = A
+juggle = 2
+ctrl = 0
+anim = 1200
+poweradd = 30
+sprpriority = 2
+
+[State 1200, Bay len]
+type = VelSet
+trigger1 = Time = 0
+x = 2.5
+y = -8.5
+
+[State 1200, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, SA
+damage = 65, 4
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 9, 10
+sparkxy = -6, -60
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 20
+ground.velocity = -1.5, -8
+air.velocity = -1.2, -7
+fall = 1
+fall.recover = 0
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 1200, Tia]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 8010
+pos = 18, -70
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 1200, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+; U trên không - lao xuống | 60, đập xuống
+[Statedef 1300]
+type = A
+movetype = A
+physics = N
+juggle = 2
+ctrl = 0
+anim = 1300
+poweradd = 30
+sprpriority = 2
+
+[State 1300, Lao]
+type = VelSet
+trigger1 = Time = 3
+x = 5
+y = 6
+
+[State 1300, Danh]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, SA
+damage = 60, 4
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 11
+sparkxy = -6, -10
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 18
+ground.velocity = -4
+air.velocity = -1.5, 6
+air.fall = 1
+fall.recover = 0
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 1300, Tiep dat]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 1305
+
+[Statedef 1305]
+type = S
+movetype = I
+physics = S
+ctrl = 0
+anim = 1305
+velset = 0,0
+
+[State 1305, Ve dat]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 1305, Bui]
+type = Explod
+trigger1 = Time = 0
+anim = 8020
+pos = 0, 0
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 1
+ownpal = 1
+trans = add
+
+[State 1305, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ============================================================================
+; TUYỆT CHIÊU (mẫu)
+; ============================================================================
+; I - đấm liên hoàn 8 nhát (8 x 18) + móc hất lên (60) = 204
+[Statedef 3000]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 3000
+sprpriority = 2
+
+[State 3000, Super pause]
+type = SuperPause
+trigger1 = Time = 0
+time = 30
+anim = -1
+sound = 20, 0
+poweradd = -1000
+
+[State 3000, Chop]
+type = Explod
+trigger1 = Time = 0
+anim = 8400
+pos = 0, -40
+postype = p1
+bindtime = -1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+supermovetime = 30
+
+[State 3000, Tien dan]
+type = VelSet
+trigger1 = AnimElemTime(2) >= 0 && AnimElemTime(18) < 0
+x = 1.6
+
+[State 3000, Dam]
+type = HitDef
+trigger1 = AnimElem = 3
+trigger2 = AnimElem = 5
+trigger3 = AnimElem = 7
+trigger4 = AnimElem = 9
+trigger5 = AnimElem = 11
+trigger6 = AnimElem = 13
+trigger7 = AnimElem = 15
+trigger8 = AnimElem = 17
+attr = S, HA
+damage = 18, 2
+getpower = 0
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 2, 5
+sparkxy = -6, -45
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 2
+ground.hittime = 24
+ground.velocity = -0.5
+air.velocity = -1, -2
+air.hittime = 20
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 3000, Moc]
+type = HitDef
+trigger1 = AnimElem = 19
+attr = S, HA
+damage = 60, 4
+getpower = 0
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 12, 14
+sparkxy = -6, -60
+hitsound = 5, 4
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 30
+ground.velocity = -1, -9
+air.velocity = -1, -9
+fall = 1
+fall.recover = 0
+envshake.time = 12
+envshake.ampl = 3
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 3000, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; W + I - tụ lực rồi bắn tia laser: 8 nhát x 25 = 200
+[Statedef 3500]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 3500
+sprpriority = 2
+
+[State 3500, Super pause]
+type = SuperPause
+trigger1 = Time = 0
+time = 30
+anim = -1
+sound = 20, 0
+poweradd = -1000
+
+[State 3500, Tu luc]
+type = Explod
+trigger1 = Time = 0
+anim = 8400
+pos = 0, -40
+postype = p1
+bindtime = -1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+supermovetime = 30
+
+[State 3500, Ban]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 3510
+
+[Statedef 3510]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 3510
+sprpriority = 2
+
+[State 3510, Tia]
+type = Explod
+trigger1 = Time = 0
+anim = 8200
+ID = 3510
+pos = 20, -35
+postype = p1
+bindtime = -1
+removetime = -1
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 3510, Nhat tia]
+type = HitDef
+trigger1 = (Time % 5) = 0 && Time < 40
+attr = S, HP
+damage = 25, 2
+getpower = 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 2, 4
+sparkxy = -6, -35
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 14
+ground.velocity = -1.5
+air.velocity = -1.5, -2
+air.hittime = 14
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 3510, Tat tia]
+type = RemoveExplod
+trigger1 = Time >= 42
+id = 3510
+
+[State 3510, Thu tay]
+type = ChangeState
+trigger1 = Time >= 42
+value = 3520
+
+[Statedef 3520]
+type = S
+movetype = I
+physics = S
+ctrl = 0
+anim = 3520
+velset = 0,0
+
+[State 3520, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; S + I - lao tới (50) -> trúng thì 8 nhát trên không (8 x 25) -> đập xuống (130) = 380
+[Statedef 4000]
+type = S
+movetype = A
+physics = S
+juggle = 2
+velset = 0,0
+ctrl = 0
+anim = 4000
+sprpriority = 2
+
+[State 4000, Super pause]
+type = SuperPause
+trigger1 = Time = 0
+time = 40
+anim = -1
+sound = 20, 0
+poweradd = -3000
+
+[State 4000, Man hinh toi]
+type = BGPalFX
+trigger1 = 1
+time = 2
+mul = 90, 90, 120
+
+[State 4000, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4000, Lao]
+type = VelSet
+trigger1 = Time = [2,18]
+x = 9
+
+[State 4000, Lao hat]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S, HA
+damage = 50, 3
+getpower = 0
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 8, 10
+sparkxy = -6, -45
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 30
+ground.velocity = -1, -8
+air.velocity = -1, -8
+fall = 1
+fall.recover = 0
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 4000, Trung]
+type = ChangeState
+trigger1 = MoveHit
+value = 4010
+
+[State 4000, Truot]
+type = ChangeState
+trigger1 = Time >= 26
+value = 0
+ctrl = 1
+
+[Statedef 4010]
+type = A
+movetype = A
+physics = N
+juggle = 0
+ctrl = 0
+anim = 4010
+sprpriority = 3
+
+[State 4010, Man hinh toi]
+type = BGPalFX
+trigger1 = 1
+time = 2
+mul = 90, 90, 120
+
+[State 4010, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4010, Dung lai]
+type = VelSet
+trigger1 = 1
+x = 0
+y = 0
+
+[State 4010, Bam theo x]
+type = PosAdd
+trigger1 = (Time % 6) = 0 && Time <= 42
+x = P2Dist X - 20
+
+[State 4010, Bam theo y]
+type = PosAdd
+trigger1 = (Time % 6) = 0 && Time <= 42
+y = P2Dist Y
+
+[State 4010, Dam]
+type = HitDef
+trigger1 = (Time % 6) = 0 && Time <= 42
+attr = A, HA
+damage = 25, 2
+getpower = 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 2, 4
+sparkxy = -6, -35
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 25
+ground.velocity = 0, -3
+air.velocity = 0, -2.4
+air.hittime = 25
+fall = 1
+fall.recover = 0
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 4010, Tia]
+type = Explod
+trigger1 = (Time % 6) = 2 && Time <= 44
+anim = 8010
+pos = 26, -40
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 5
+ownpal = 1
+trans = add
+
+[State 4010, Dap]
+type = ChangeState
+trigger1 = Time >= 48
+value = 4020
+
+[Statedef 4020]
+type = A
+movetype = A
+physics = N
+ctrl = 0
+anim = 4020
+velset = 0,0
+sprpriority = 3
+
+[State 4020, Man hinh toi]
+type = BGPalFX
+trigger1 = AnimElemTime(2) < 0
+time = 2
+mul = 90, 90, 120
+
+[State 4020, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4020, Dap xuong]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, HA
+damage = 130, 5
+getpower = 0
+animtype = Hard
+guardflag = MA
+hitflag = MAFD
+priority = 7, Hit
+pausetime = 14, 16
+sparkxy = -6, -40
+hitsound = 5, 4
+guardsound = 6, 0
+ground.type = High
+ground.hittime = 30
+ground.velocity = -3, 6
+air.velocity = -3, 8
+fall = 1
+fall.recover = 0
+envshake.time = 20
+envshake.ampl = 6
+sparkno = S8010
+guard.sparkno = S8010
+
+[State 4020, Roi]
+type = VelSet
+trigger1 = AnimElem = 2
+y = 7
+
+[State 4020, Cham dat]
+type = ChangeState
+trigger1 = AnimElemTime(2) >= 0 && Pos Y >= 0
+value = 4030
+
+[Statedef 4030]
+type = S
+movetype = I
+physics = S
+ctrl = 0
+anim = 4030
+velset = 0,0
+
+[State 4030, Ve dat]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 4030, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

@@ -6,7 +6,9 @@ from PIL import ImageGrab
 out = sys.argv[1]
 delays = [float(x) for x in sys.argv[2].split(',')]
 args = sys.argv[sys.argv.index('--') + 1:]
-p = subprocess.Popen([os.path.abspath('Ikemen_GO.exe')] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+import tempfile
+LOG = tempfile.NamedTemporaryFile(delete=False, suffix='.log')
+p = subprocess.Popen([os.path.abspath('Ikemen_GO.exe')] + args, stdout=LOG, stderr=subprocess.STDOUT)
 user32 = ctypes.windll.user32
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(2)
@@ -96,6 +98,9 @@ for d, kind, arg in events:
     print('saved', '%s_%d.png' % (out, i), img.size)
 if p.poll() is None:
     p.kill()
-outp = p.communicate()[0].decode('utf-8', 'replace')
+p.wait()
+LOG.close()
+outp = open(LOG.name, 'rb').read().decode('utf-8', 'replace')
+os.unlink(LOG.name)
 print('--- output ---')
 print('\n'.join(l for l in outp.splitlines() if not l.startswith(('\t', 'goroutine', 'runtime'))))

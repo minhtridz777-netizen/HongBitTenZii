@@ -65,7 +65,7 @@ local function f_initUi()
 	rectSetLocalcoord(ui.bg, LC_W, LC_H)
 	rectSetColor(ui.bg, 0, 0, 0)
 	rectSetAlpha(ui.bg, 150, 106)
-	rectSetWindow(ui.bg, X0 - 3, Y0 - LINE + 1, X0 + 172, Y0 + LINE * (NLINES - 1) + 3)
+	rectSetWindow(ui.bg, X0 - 3, Y0 - LINE + 1, X0 + 190, Y0 + LINE * (NLINES - 1) + 3)
 	for i = 1, NLINES do
 		local ts = textImgNew()
 		textImgSetFont(ts, ui.font)
@@ -96,7 +96,7 @@ local function f_readPlayer(n)
 	local p = {
 		name = name(), life = life(), lifeMax = lifeMax(), power = power(),
 		state = stateNo(), anim = anim(), ctrl = ctrl(), moveType = moveType(),
-		combo = comboCount(),
+		combo = comboCount(), gp = guardPoints(),
 	}
 	if n == 1 then
 		p.vars = {}
@@ -163,8 +163,8 @@ end
 local function f_draw(p1, p2)
 	local L = ui.lines
 	textImgSetText(L[1], 'LAB  |  ' .. p1.name .. '  vs  ' .. p2.name)
-	textImgSetText(L[2], string.format('State %d   Anim %d   Ctrl %s   Năng lượng %d',
-		p1.state, p1.anim, p1.ctrl and 'có' or 'không', p1.power))
+	textImgSetText(L[2], string.format('State %d  Anim %d  Ctrl %s  Năng lượng %d  Thể lực %d',
+		p1.state, p1.anim, p1.ctrl and 'có' or 'không', p1.power, p1.gp))
 	textImgSetText(L[3], string.format('Đòn cuối: %d    Combo: %d hit / %d sát thương',
 		st.lastDmg, st.comboHits, st.comboDmg))
 	textImgSetText(L[4], string.format('Combo lớn nhất: %d hit / %d    Lợi thế khung: %s',
@@ -191,6 +191,14 @@ local function f_overlay()
 		local p2 = f_readPlayer(2)
 		if p1 == nil or p2 == nil then return end
 		f_update(p1, p2)
+		-- LAB_LOG=1: ghi log mỗi lần state P1/P2 đổi (cho Claude kiểm tra tự động)
+		if os.getenv('LAB_LOG') then
+			local key = p1.state .. '/' .. p2.state
+			if key ~= lab.lastLog then
+				lab.lastLog = key
+				print(string.format('LAB f=%d P1 st=%d mt=%s ctrl=%s gp=%d | P2 st=%d mt=%s', st.frame, p1.state, p1.moveType, tostring(p1.ctrl), p1.gp, p2.state, p2.moveType))
+			end
+		end
 		f_draw(p1, p2)
 	end)
 	if okId then pcall(playerId, oldid) end
