@@ -63,7 +63,7 @@
 | A D | ← → | Back / Fwd | Đi trái / phải |
 | J | Numpad 1 | `a` | Đánh thường |
 | K | Numpad 2 | `b` | Nhảy (nhảy đôi khi đang bay) |
-| L | Numpad 3 | `c` | Lướt đất / trên không (tốn thể lực) |
+| L | Numpad 3 | `c` | Lướt đất / trên không (tốn thể lực). W + L = Bước Ma, S + L = thoát combo |
 | U | Numpad 4 | `x` | Chiêu đặc biệt |
 | I | Numpad 5 | `y` | Tuyệt chiêu |
 | O | Numpad 6 | `z` | Trợ thủ (để dành) |
@@ -80,6 +80,7 @@ Bảng ký hiệu trong file thiết kế dùng phím của người chơi 1.
 - **Thể lực** (thanh chung cho đỡ và lướt, tối đa 100): lướt đất −20, trên không −30; đỡ trúng đòn −(sát thương ÷ 4); hồi khi không đỡ không lướt;
   đang giữ S thì không hồi; hết thể lực khi đang đỡ → vỡ thế (choáng ~1 giây). Số liệu mặc định, chỉnh khi test.
 - **Thoát combo (S + L)** khi đang trúng đòn: tốn 1 thanh năng lượng, hình thức thoát tùy tướng.
+- **Bước Ma (W + L):** tốn 600 năng lượng + 800 thể lực; dưới đất vụt ra sau lưng đối thủ, trên không vọt lên.
 - **Lướt kiểu Bleach vs Naruto:** xuyên qua người đối thủ, bất tử đầu cú lướt, hủy được từ đòn J trúng.
 - **Nhảy đôi, lướt trên không**, lên/xuống bậc.
 

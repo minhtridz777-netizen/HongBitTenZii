@@ -4,7 +4,7 @@ Nhân vật mẫu **"Mau"** chạy được trong LAB, có đủ khung chuẩn (
 
 | File | Vai trò | Nhân vật mới |
 |---|---|---|
-| `khung.cns` | Cơ chế chung: đi, nhảy, nhảy đôi, lướt xuyên người (đất/trên không), giữ S đỡ, thể lực, thoát combo S+L | **Không copy** – trỏ tới bằng `st2` |
+| `khung.cns` | Cơ chế chung: đi, nhảy, nhảy đôi, lướt xuyên người (đất/trên không), Bước Ma W+L, giữ S đỡ, thể lực, thoát combo S+L | **Không copy** – trỏ tới bằng `st2` |
 | `mau.def` | Khai báo file | copy, đổi tên |
 | `mau.cmd` | Lệnh (giữ nguyên) + bảng chuyển chiêu State -1 (sửa) | copy, sửa phần CHUYỂN CHIÊU |
 | `mau.cns` | Chỉ số + bộ chiêu mẫu | copy, viết lại chiêu theo thiết kế |
@@ -54,4 +54,6 @@ Thêm vào `data/select.def`: `<ten>, stages/lab_bac.def` → mở `LAB.exe` là
 - **Bậc:** `shared/system/platforms.zss` (chung cho mọi nhân vật, không cần code trong nhân vật). Nhân vật đang ngã được bậc "giữ" thêm 30 đơn vị để kịp chạm bậc; vì vậy bậc phải cao ít nhất 40.
 - **Lướt (kiểu Bleach vs Naruto):** `PlayerPush = 0` để vụt xuyên qua người đối thủ, bất tử 4 tick đầu, vệt mờ (AfterImage).
   Tốn 20% thể lực dưới đất, 30% trên không. Đòn J đất 200–239 / J trên không 600–699 trúng thì hủy sang lướt.
+- **Bước Ma (W + L):** state 750 (đất, vụt 14 px/tick × 6 tick) / 755 (trên không, vọt lên). Tốn 600 năng lượng + 800 thể lực.
+  Hủy được từ đòn đã chạm: đất 200–499, 1000–1999; trên không 600–699, 1200–1399.
 - **Bộ đệm phím J = 1 tick** (trong `.cmd`): để 5 tick thì 1 lần bấm ra 2 đòn, vì engine giữ lần bấm trong lúc khựng hình.

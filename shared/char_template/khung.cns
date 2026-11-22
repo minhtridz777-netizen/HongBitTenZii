@@ -5,13 +5,13 @@
 ; Sửa ở đây = áp dụng cho mọi nhân vật.
 ;
 ; Yêu cầu trong file .cmd của nhân vật (có sẵn trong mẫu mau.cmd):
-;   "K" "L" "down_L" "back_L" "walkfwd" "walkback" "press_back"
+;   "K" "L" "up_L" "down_L" "back_L" "walkfwd" "walkback" "press_back"
 ;   "holddown" (giữ S) và "holdback" ĐƯỢC GÁN = giữ S (để engine đỡ đòn bằng S).
 ;
 ; Biến hệ thống dùng ở đây:
 ;   var(0) = đã lướt trên không trong lần nhảy này | var(1) = đã nhảy đôi
 ;
-; State trong file: 20 (đi), 40 (bắt đầu nhảy), 700/705/710/720 (lướt, nhảy đôi),
+; State trong file: 20 (đi), 40 (bắt đầu nhảy), 700/705/710/720 (lướt, nhảy đôi), 750/755 (Bước Ma W+L),
 ;                   800 (giữ S - thế đỡ), 860/865 (thoát combo S+L)
 ; Thể lực = guard points của engine (thanh dưới thanh máu), tối đa 1000:
 ;   lướt đất -200 (20%), lướt trên không -300 (30%) | đỡ trúng: engine trừ theo sát thương
@@ -111,10 +111,29 @@ trigger1 = stateno = [41,51] || stateno = 710 || stateno = 52
 trigger2 = stateno = [600,699] && movecontact
 value = 720
 
+; ---------------- BƯỚC MA: W + L (giống Ghost Step của Bleach vs Naruto) ----------------
+; Tốn 600 năng lượng + 800 thể lực. Dưới đất: vụt tới xuyên người, ra sau lưng đối thủ. Trên không: vọt lên.
+; Dùng được khi có ctrl hoặc hủy từ đòn đã chạm (trúng / bị đỡ). Không dùng khi đang bị đánh.
+[State -3, Buoc ma dat]
+type = ChangeState
+triggerall = command = "up_L" && power >= 600 && guardpoints >= 800
+triggerall = movetype != H && statetype != A
+trigger1 = ctrl
+trigger2 = ((stateno = [200,499]) || (stateno = [1000,1999])) && movecontact
+value = 750
+
+[State -3, Buoc ma khong]
+type = ChangeState
+triggerall = command = "up_L" && power >= 600 && guardpoints >= 800
+triggerall = movetype != H && statetype = A
+trigger1 = ctrl
+trigger2 = ((stateno = [600,699]) || (stateno = [1200,1399])) && movecontact
+value = 755
+
 ; Lướt trên không: L khi đang bay (1 lần mỗi lần nhảy), tốn 30% thể lực. Hủy được từ J trên không trúng đòn.
 [State -3, Luot tren khong]
 type = ChangeState
-triggerall = command = "L" && statetype = A && var(0) = 0
+triggerall = command = "L" && command != "holdup" && statetype = A && var(0) = 0
 triggerall = guardpoints >= 300 && pos y < -12
 trigger1 = ctrl
 trigger2 = (stateno = [600,699]) && movecontact
@@ -132,7 +151,7 @@ value = 705
 
 [State -3, Luot toi]
 type = ChangeState
-triggerall = command = "L" && statetype = S && command != "holddown"
+triggerall = command = "L" && statetype = S && command != "holddown" && command != "holdup"
 triggerall = guardpoints >= 200
 trigger1 = ctrl
 trigger2 = (stateno = [200,239]) && movecontact
@@ -387,6 +406,184 @@ type = VelSet
 trigger1 = Time = 0
 x = ifelse(command = "walkfwd", const(velocity.airjump.fwd.x), ifelse(command = "walkback", const(velocity.airjump.back.x), 0))
 y = const(velocity.airjump.y)
+
+;---------------------------------------------------------------------------
+; W + L dưới đất - Bước Ma: vụt tới ~85 px, xuyên người, bất tử, mờ ảo; ra sau lưng thì quay mặt lại
+[Statedef 750]
+type = S
+movetype = I
+physics = N
+ctrl = 0
+anim = 700
+velset = 0,0
+sprpriority = 2
+
+[State 750, Gia]
+type = PowerAdd
+trigger1 = Time = 0
+value = -600
+
+[State 750, The luc]
+type = GuardPointsAdd
+trigger1 = Time = 0
+value = -800
+absolute = 1
+
+[State 750, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 12
+
+[State 750, Xuyen qua nguoi]
+type = PlayerPush
+trigger1 = Time <= 10
+value = 0
+
+[State 750, Mo ao]
+type = Trans
+trigger1 = Time <= 7
+trans = addalpha
+alpha = 110, 146
+
+[State 750, Bong ma]
+type = AfterImage
+trigger1 = Time = 0
+time = 10
+length = 8
+timegap = 1
+framegap = 1
+trans = add
+palbright = 40, 20, 80
+palcontrast = 120, 80, 200
+
+[State 750, Khoi di]
+type = Explod
+trigger1 = Time = 0
+anim = 8300
+pos = 0, -28
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 750, Vut toi]
+type = VelSet
+trigger1 = Time <= 5
+x = 14
+
+[State 750, Dung]
+type = VelSet
+trigger1 = Time = 6
+x = 0
+
+[State 750, Quay mat]
+type = Turn
+trigger1 = Time = 6 && P2Dist X < 0
+
+[State 750, Khoi den]
+type = Explod
+trigger1 = Time = 6
+anim = 8300
+pos = 0, -28
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 750, Het]
+type = ChangeState
+trigger1 = Time >= 12
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; W + L trên không - Bước Ma vọt lên (lên bậc cao, né, đuổi theo đối thủ trên cao)
+[Statedef 755]
+type = A
+movetype = I
+physics = N
+ctrl = 0
+anim = 720
+velset = 0,0
+sprpriority = 2
+
+[State 755, Gia]
+type = PowerAdd
+trigger1 = Time = 0
+value = -600
+
+[State 755, The luc]
+type = GuardPointsAdd
+trigger1 = Time = 0
+value = -800
+absolute = 1
+
+[State 755, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 10
+
+[State 755, Xuyen qua nguoi]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 755, Mo ao]
+type = Trans
+trigger1 = Time <= 6
+trans = addalpha
+alpha = 110, 146
+
+[State 755, Bong ma]
+type = AfterImage
+trigger1 = Time = 0
+time = 8
+length = 8
+timegap = 1
+framegap = 1
+trans = add
+palbright = 40, 20, 80
+palcontrast = 120, 80, 200
+
+[State 755, Khoi]
+type = Explod
+trigger1 = Time = 0
+anim = 8300
+pos = 0, -28
+postype = p1
+bindtime = 1
+removetime = -2
+sprpriority = 4
+ownpal = 1
+trans = add
+
+[State 755, Vot len]
+type = VelSet
+trigger1 = Time <= 5
+x = ifelse(command = "walkback", -3, 3)
+y = -11
+
+[State 755, Ham]
+type = VelSet
+trigger1 = Time = 6
+x = 1
+y = -1
+
+[State 755, Quay mat]
+type = Turn
+trigger1 = Time = 6 && P2Dist X < 0
+
+[State 755, Roi]
+type = ChangeState
+trigger1 = Time >= 8
+value = 50
+ctrl = 1
 
 ;---------------------------------------------------------------------------
 ; Giữ S - thế đỡ: đứng yên, A/D quay hướng đỡ. Engine tự chuyển sang 120-155 khi chặn đòn.

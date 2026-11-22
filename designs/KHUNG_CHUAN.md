@@ -29,7 +29,7 @@
 | A / D | ← / → | Đi trái / phải | Khi đang đỡ: quay hướng đỡ |
 | J | Num1 | Đánh thường | |
 | K | Num2 | Nhảy (nhảy đôi khi đang bay) | S + K trên bậc = xuống bậc |
-| L | Num3 | Lướt (đất và trên không) | Tốn thể lực |
+| L | Num3 | Lướt (đất và trên không) | Tốn thể lực. W + L = Bước Ma, S + L = thoát combo |
 | U | Num4 | Chiêu | |
 | I | Num5 | Tuyệt chiêu | |
 | O | Num6 | Trợ thủ (để dành) | |
@@ -61,6 +61,12 @@ Các con số dưới đây là mặc định, chỉnh sau khi test.
 - Đang bị đánh (trúng đòn), bấm S + L → thoát ra (biến mất / lộn / dịch chuyển…) – **hình thức tùy tướng**.
 - Giá: **1 thanh năng lượng (1000)**.
 - Có vài tick bất tử sau khi thoát. Không dùng được khi đang nằm đất.
+
+### 3.3b Bước Ma – W + L (giống Ghost Step của Bleach vs Naruto)
+- Tốn **600 năng lượng + 800 thể lực**. Bất tử, mờ ảo, có bóng ma.
+- Dưới đất: vụt tới ~85 px xuyên qua người, ra sau lưng thì tự quay mặt (vòng ra sau đối thủ đang đỡ).
+- Trên không: vọt lên (lên bậc cao, né, đuổi đối thủ trên cao).
+- Dùng khi có quyền điều khiển hoặc hủy từ đòn đã chạm (trúng hoặc bị đỡ). Không dùng khi đang bị đánh.
 
 ### 3.4 Di chuyển
 - Nhảy đôi (K lần 2 khi đang bay), lướt trên không (L khi đang bay, 1 lần mỗi lần nhảy).

@@ -67,6 +67,12 @@ buffer.time = 1   ; 1 tick: tránh 1 lần bấm ra 2 đòn (engine giữ lần 
 
 ;-| Di chuyển (khung.cns dùng) |----------------------------------------------
 [Command]
+name = "up_L"            ; W + L : Bước Ma (vòng ra sau lưng / vọt lên khi đang bay)
+command = /$U, c
+time = 1
+buffer.time = 3
+
+[Command]
 name = "down_L"          ; S + L : thoát combo
 command = /$D, c
 time = 1
