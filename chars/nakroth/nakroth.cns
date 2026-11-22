@@ -1,0 +1,1382 @@
+; ============================================================================
+; NAKROTH - chỉ số + state (.cns)
+; Thiết kế: designs/NAKROTH_DESIGN.md (nguồn chuẩn)
+; HÌNH TẠM: animation mượn KFM, số anim theo quy ước CLAUDE.md.
+;
+; ---------------- BẢNG BIẾN ----------------
+; var(0)  - [U] số tick còn lại để bấm U lần 2 (tái kích hoạt), đặt = 61 trong state 1000
+; var(1)  - [S+U] số tick còn cường hóa nhát J kế tiếp (180 tick sau khi tiếp đất)
+; var(2)  - [Nội tại Thẩm Phán] số tick còn tăng tốc đánh J (150 tick khi chiêu U trúng)
+; var(3)  - [.cmd] = 1 khi được phép hủy sang chiêu U / tuyệt chiêu (tính lại mỗi tick)
+; var(4)  - [J trên không] số nhát J trên không đã nối liên tiếp (reset khi chạm đất)
+; var(10) - [S+I] đếm số lần lướt xuyên qua đối thủ
+;
+; ---------------- VỊ TRÍ CHIÊU ----------------
+; 200 J1 | 210 J2 | 220 J3 | 230 J4 (hất) | 240 W+J | 250 J cường hóa
+; 400 S+J | 600 J trên không | 700 lướt tới | 705 lướt lùi
+; 1000 U lần 1 | 1010 U lần 2 | 1100 S+U | 1200 W+U | 1300 U trên không
+; 3000 I Gươm Hành Quyết | 4000-4020 S+I Phán Quyết Cuối Cùng
+; State -2: nội tại, đếm giờ, tắt nhảy bằng W
+; ============================================================================
+
+[Data]
+life = 850                ; máu mỏng (chuẩn 1000)
+attack = 110
+defence = 90
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 2
+guard.sparkno = 40
+KO.echo = 0
+volume = 0
+IntPersistIndex = 60
+FloatPersistIndex = 40
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 15
+ground.front = 16
+air.back = 12
+air.front = 12
+height = 60
+attack.dist = 160
+proj.attack.dist = 90
+proj.doscale = 0
+head.pos = -5, -90
+mid.pos = -5, -60
+shadowoffset = 0
+draw.offset = 0,0
+
+[Velocity]
+walk.fwd  = 3.1           ; nhanh hơn KFM ~30% (KFM 2.4)
+walk.back = -2.9          ; (KFM -2.2)
+run.fwd  = 4.6, 0         ; không dùng (lướt là state 700)
+run.back = -4.5,-3.8
+jump.neu = 0,-8.4
+jump.back = -2.8
+jump.fwd = 2.8
+runjump.back = -2.55,-8.1
+runjump.fwd = 4,-8.1
+airjump.neu = 0,-8.1
+airjump.back = -2.55
+airjump.fwd = 2.5
+air.gethit.groundrecover = -.15,-3.5
+air.gethit.airrecover.mul = .5,.2
+air.gethit.airrecover.add = 0,-4.5
+air.gethit.airrecover.back = -1
+air.gethit.airrecover.fwd = 0
+air.gethit.airrecover.up = -2
+air.gethit.airrecover.down = 1.5
+
+[Movement]
+airjump.num = 0           ; không nhảy kép
+airjump.height = 35
+yaccel = .44
+stand.friction = .85
+crouch.friction = .82
+stand.friction.threshold = 2
+crouch.friction.threshold = .05
+air.gethit.groundlevel = 25
+air.gethit.groundrecover.ground.threshold = -20
+air.gethit.groundrecover.groundlevel = 10
+air.gethit.airrecover.threshold = -1
+air.gethit.airrecover.yaccel = .35
+air.gethit.trip.groundlevel = 15
+down.bounce.offset = 0, 20
+down.bounce.yaccel = .4
+down.bounce.groundlevel = 12
+down.friction.threshold = .05
+
+[Quotes]
+victory1 = "Phan quyet da duoc dua ra."
+victory2 = "Qua cham."
+
+; ============================================================================
+; STATE HỆ THỐNG: thua, thắng, xuất hiện
+; ============================================================================
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[State 170, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[Statedef 180]
+type = S
+
+[State 180, Chon dang thang]
+type = ChangeState
+trigger1 = Time = 0
+value = 181
+
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[State 181, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+; Xuất hiện đầu trận (state 190 của engine chuyển sang đây)
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, Giu anim khi PreIntro]
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 190
+
+[State 191, Intro]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, Xong]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+; ============================================================================
+; ĐÁNH THƯỜNG ĐỨNG (200-299)
+; Nội tại: khi var(2) > 0 dùng anim nhanh 280-283 (cùng số elem, ít tick hơn)
+; ============================================================================
+
+;---------------------------------------------------------------------------
+; J1 - nhát 1 chuỗi song đao | 25 sát thương | ra đòn 3 tick (bản nhanh 2 tick)
+[Statedef 200]
+type    = S
+movetype= A
+physics = S
+juggle  = 1
+velset  = 0,0
+ctrl    = 0
+poweradd = 15
+sprpriority = 2
+
+[State 200, Anim]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse(var(2) > 0, 280, 200)
+
+[State 200, Tien]
+type = VelSet
+trigger1 = Time = 0
+x = 1.5
+
+[State 200, Am thanh]
+type = PlaySnd
+trigger1 = Time = 1
+value = 0, 0
+
+[State 200, Danh]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, NA
+damage = 25, 0
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 6, 7
+sparkxy = -10, -76
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 5
+ground.hittime = 14
+ground.velocity = -2.5
+air.velocity = -1.4, -3
+air.hittime = 16
+
+[State 200, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; J2 - nhát 2 | 25 sát thương
+[Statedef 210]
+type    = S
+movetype= A
+physics = S
+juggle  = 1
+velset  = 0,0
+ctrl    = 0
+poweradd = 15
+sprpriority = 2
+
+[State 210, Anim]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse(var(2) > 0, 281, 210)
+
+[State 210, Tien]
+type = VelSet
+trigger1 = Time = 0
+x = 2
+
+[State 210, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 4
+value = 0, 0
+
+[State 210, Danh]
+type = HitDef
+trigger1 = AnimElem = 5
+attr = S, NA
+damage = 25, 0
+animtype = Light
+guardflag = MA
+hitflag = MAF
+priority = 3, Hit
+pausetime = 6, 7
+sparkxy = -10, -76
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 5
+ground.hittime = 15
+ground.velocity = -2.5
+air.velocity = -1.4, -3
+air.hittime = 16
+
+[State 210, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; J3 - nhát 3 | 30 sát thương
+[Statedef 220]
+type    = S
+movetype= A
+physics = S
+juggle  = 1
+velset  = 0,0
+ctrl    = 0
+poweradd = 20
+sprpriority = 2
+
+[State 220, Anim]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse(var(2) > 0, 282, 220)
+
+[State 220, Tien]
+type = VelSet
+trigger1 = Time = 0
+x = 2
+
+[State 220, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = 0, 1
+
+[State 220, Danh]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, NA
+damage = 30, 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 7, 8
+sparkxy = -10, -50
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 6
+ground.hittime = 16
+ground.velocity = -3
+air.velocity = -1.5, -3.2
+air.hittime = 17
+
+[State 220, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; J4 - nhát 4 HẤT TUNG (nội tại Thẩm Phán #1) | 45 sát thương
+[Statedef 230]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+poweradd = 30
+sprpriority = 2
+
+[State 230, Anim]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse(var(2) > 0, 283, 230)
+
+[State 230, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = 0, 2
+
+[State 230, Danh hat tung]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, NA
+damage = 45, 0
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 9, 10
+sparkxy = -10, -60
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 18
+ground.velocity = -2.5, -7.5
+air.velocity = -2.5, -7
+fall = 1
+fall.recover = 0
+
+[State 230, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; W + J - Chém hất: chém từ dưới lên, hất cao để mở combo trên không | 50
+[Statedef 240]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+poweradd = 30
+anim    = 240
+sprpriority = 2
+
+[State 240, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = 0, 1
+
+[State 240, Danh hat]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, NA
+damage = 50, 0
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 9, 10
+sparkxy = -10, -80
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 6
+ground.hittime = 18
+ground.velocity = -1.5, -9
+air.velocity = -1.5, -8.5
+fall = 1
+fall.recover = 0
+
+[State 240, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; J cường hóa (sau S+U) - chém quét ngang tầm xa | 90 sát thương
+[Statedef 250]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+poweradd = 40
+anim    = 250
+sprpriority = 2
+
+[State 250, Dung cuong hoa]
+type = VarSet
+trigger1 = Time = 0
+var(1) = 0
+
+[State 250, Nhay do]
+type = PalFX
+trigger1 = Time = 0
+time = 12
+add = 160, 20, 20
+sinadd = 60, 0, 0, 6
+
+[State 250, Tien]
+type = VelSet
+trigger1 = AnimElem = 5
+x = 4
+
+[State 250, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = 0, 3
+
+[State 250, Chem quet]
+type = HitDef
+trigger1 = AnimElem = 6
+attr = S, SA
+damage = 90, 5
+animtype = Heavy
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 12, 13
+sparkxy = -10, -65
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 22
+ground.velocity = -6
+air.velocity = -4, -4
+air.fall = 1
+fall.recover = 0
+
+[State 250, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ============================================================================
+; ĐÁNH THƯỜNG NGỒI (400-499)
+; ============================================================================
+; S + J - Quét chân: đánh ngã, phải đỡ thấp | 40
+[Statedef 400]
+type    = C
+movetype= A
+physics = C
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+poweradd = 25
+anim    = 400
+sprpriority = 2
+
+[State 400, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = 0, 2
+
+[State 400, Quet chan]
+type = HitDef
+trigger1 = AnimElem = 4
+attr = C, NA
+damage = 40, 0
+animtype = Medium
+hitflag = MAFD
+guardflag = L
+priority = 4, Hit
+pausetime = 9, 10
+sparkno = 1
+sparkxy = -5, -10
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = Trip
+ground.slidetime = 10
+ground.hittime = 17
+ground.velocity = -1.5, -2
+air.velocity = -1.2, -3
+guard.velocity = -5
+fall = 1
+
+[State 400, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+; ============================================================================
+; ĐÁNH THƯỜNG TRÊN KHÔNG (600-699)
+; ============================================================================
+; J trên không - chém chéo xuống | 40. Nối được 2 nhát khi trúng (var(4)).
+[Statedef 600]
+type    = A
+movetype= A
+physics = A
+juggle  = 1
+ctrl    = 0
+poweradd = 20
+sprpriority = 2
+
+[State 600, Anim]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse(var(2) > 0, 680, 600)
+
+[State 600, Dem nhat]
+type = VarAdd
+trigger1 = Time = 0
+var(4) = 1
+
+; Nhát nối thứ 2 trở đi: hãm rơi để kịp đánh tiếp
+[State 600, Ham roi]
+type = VelSet
+trigger1 = Time = 0 && prevstateno = [600,1299]
+y = -2.5
+
+[State 600, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = 0, 1
+
+[State 600, Chem cheo]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = A, NA
+damage = 40, 0
+animtype = Medium
+guardflag = HA
+hitflag = MAF
+priority = 4, Hit
+pausetime = 8, 9
+sparkxy = -10, -60
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 6
+ground.hittime = 16
+ground.velocity = -3
+air.velocity = -1.5, -4
+air.hittime = 20
+
+[State 600, Hoi ctrl]
+type = CtrlSet
+trigger1 = AnimElemTime(4) >= 8
+value = 1
+
+; ============================================================================
+; LƯỚT (700-799) - phím L
+; ============================================================================
+; L - lướt tới: nhanh và xa nhất game. Hủy được sang J / W+J / U / tuyệt chiêu / nhảy.
+[Statedef 700]
+type    = S
+movetype= I
+physics = S
+ctrl    = 0
+anim    = 700
+sprpriority = 1
+
+[State 700, Toc do]
+type = VelSet
+trigger1 = Time <= 11
+x = 9.5
+
+[State 700, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 14
+length = 6
+palbright = 60, 0, 0
+palcontrast = 120, 120, 120
+trans = add
+
+[State 700, Am thanh]
+type = PlaySnd
+trigger1 = Time = 0
+value = 40, 0
+
+[State 700, Het]
+type = ChangeState
+trigger1 = Time >= 18
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; A + L - lướt lùi (nhảy lùi ngắn, vài tick bất tử đầu)
+[Statedef 705]
+type    = A
+movetype= I
+physics = A
+ctrl    = 0
+anim    = 705
+sprpriority = 1
+
+[State 705, Toc do]
+type = VelSet
+trigger1 = Time = 0
+x = -6
+y = -3.5
+
+[State 705, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 6
+
+[State 705, Tiep dat]
+type = ChangeState
+trigger1 = Vel Y > 0 && Pos Y >= 0
+value = 106
+
+; ============================================================================
+; CHIÊU U (1000-1999)
+; ============================================================================
+; U lần 1 - Bồi Thẩm Đoàn: lướt tới chém HẤT TUNG | 60
+; Sau khi chiêu kết thúc còn 60 tick để bấm U lần 2 (var(0)).
+[Statedef 1000]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+anim    = 1000
+poweradd = 40
+sprpriority = 2
+
+[State 1000, Mo cua so tai kich hoat]
+type = VarSet
+trigger1 = 1
+var(0) = 61
+
+[State 1000, Luot]
+type = VelSet
+trigger1 = Time = [2,12]
+x = 7.5
+
+[State 1000, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 16
+length = 6
+palbright = 60, 0, 0
+trans = add
+
+[State 1000, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = 0, 2
+
+[State 1000, Chem hat]
+type = HitDef
+trigger1 = AnimElem = 6
+attr = S, SA
+damage = 60, 3
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 11
+sparkxy = -10, -65
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 20
+ground.velocity = -2.5, -7
+air.velocity = -2.5, -6
+fall = 1
+fall.recover = 0
+
+[State 1000, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; U lần 2 - tái kích hoạt: lướt thêm một đoạn, chém KHÔNG hất tung | 50
+[Statedef 1010]
+type    = S
+movetype= A
+physics = S
+juggle  = 1
+velset  = 0,0
+ctrl    = 0
+anim    = 1010
+poweradd = 30
+sprpriority = 2
+
+[State 1010, Dong cua so]
+type = VarSet
+trigger1 = Time = 0
+var(0) = 0
+
+[State 1010, Luot]
+type = VelSet
+trigger1 = Time = [1,10]
+x = 8
+
+[State 1010, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 14
+length = 6
+palbright = 60, 0, 0
+trans = add
+
+[State 1010, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = 0, 1
+
+[State 1010, Chem]
+type = HitDef
+trigger1 = AnimElem = 6
+attr = S, SA
+damage = 50, 3
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 9, 10
+sparkxy = -10, -65
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 18
+ground.velocity = -5
+air.velocity = -2, -3.5
+air.hittime = 20
+
+[State 1010, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; S + U - Nguồn Cơn Rắc Rối: lộn ngược ra sau, 10 tick bất tử đầu.
+; Sau khi tiếp đất: 180 tick cường hóa nhát J kế tiếp (var(1)) -> state 250.
+[Statedef 1100]
+type    = A
+movetype= I
+physics = A
+ctrl    = 0
+anim    = 1100
+sprpriority = 1
+
+[State 1100, Lon nguoc]
+type = VelSet
+trigger1 = Time = 0
+x = -4.5
+y = -6.5
+
+[State 1100, Bat tu]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 10
+
+; Giữ var(1) đầy trong lúc lộn -> đếm 180 tick bắt đầu từ lúc tiếp đất
+[State 1100, Cuong hoa]
+type = VarSet
+trigger1 = 1
+var(1) = 181
+
+[State 1100, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 20
+length = 8
+palbright = 90, 0, 0
+trans = add
+
+[State 1100, Am thanh]
+type = PlaySnd
+trigger1 = Time = 0
+value = 0, 0
+
+[State 1100, Tiep dat]
+type = ChangeState
+trigger1 = Vel Y > 0 && Pos Y >= 0
+value = 52
+
+;---------------------------------------------------------------------------
+; W + U - Phi Đao Thăng Thiên: lướt chéo lên trời chém, đuổi đối thủ bị hất | 55
+[Statedef 1200]
+type    = A
+movetype= A
+physics = A
+juggle  = 2
+ctrl    = 0
+anim    = 1200
+poweradd = 40
+sprpriority = 2
+
+[State 1200, Bay len]
+type = VelSet
+trigger1 = Time = 0
+x = 3.5
+y = -9.5
+
+[State 1200, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 18
+length = 6
+palbright = 60, 0, 0
+trans = add
+
+[State 1200, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = 0, 2
+
+; Đòn chém (thử lại ở elem 7 nếu elem 3 chưa chạm)
+[State 1200, Chem]
+type = HitDef
+trigger1 = AnimElem = 3
+trigger2 = AnimElem = 7 && !movecontact
+attr = A, SA
+damage = 55, 3
+animtype = Up
+guardflag = MA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 9, 10
+sparkxy = -10, -70
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 6
+ground.hittime = 20
+ground.velocity = -1.5, -8
+air.velocity = -1.2, -7
+fall = 1
+fall.recover = 0
+
+[State 1200, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; U trên không - Lướt chém không trung: lướt chéo xuống, trúng thì đập đối thủ xuống | 55
+[Statedef 1300]
+type    = A
+movetype= A
+physics = N
+juggle  = 2
+ctrl    = 0
+anim    = 1300
+poweradd = 40
+sprpriority = 2
+
+[State 1300, Khung lai]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = -1
+
+[State 1300, Lao xuong]
+type = VelSet
+trigger1 = Time = 5
+x = 6
+y = 6.5
+
+[State 1300, Bong]
+type = AfterImage
+trigger1 = Time = 5
+time = 20
+length = 6
+palbright = 60, 0, 0
+trans = add
+
+[State 1300, Am thanh]
+type = PlaySnd
+trigger1 = Time = 5
+value = 0, 2
+
+[State 1300, Chem dap]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = A, SA
+damage = 55, 3
+animtype = Heavy
+guardflag = HA
+hitflag = MAF
+priority = 5, Hit
+pausetime = 10, 11
+sparkxy = -10, -50
+hitsound = 5, 3
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 8
+ground.hittime = 18
+ground.velocity = -4
+air.velocity = -1.5, 7
+air.fall = 1
+fall.recover = 0
+
+[State 1300, Tiep dat]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 1305
+
+; Tiếp đất sau U trên không
+[Statedef 1305]
+type    = S
+movetype= I
+physics = S
+ctrl    = 0
+anim    = 1305
+velset  = 0,0
+
+[State 1305, Ve dat]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 1305, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ============================================================================
+; TUYỆT CHIÊU CẤP 1 (3000-3999) - phím I, 1000 power
+; ============================================================================
+; I - Gươm Hành Quyết: 6 nhát chém liên tục + nhát cuối hất văng (~200)
+; Siêu giáp: BẢN ĐẦU TẠM DÙNG BẤT TỬ toàn chiêu (theo phương án dự phòng
+;            trong bản thiết kế). TODO: làm siêu giáp thật (giảm 50% sát thương).
+[Statedef 3000]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+anim    = 3000
+sprpriority = 2
+
+[State 3000, Super pause]
+type = SuperPause
+trigger1 = Time = 0
+time = 30
+anim = 100
+sound = 20, 0
+pos = 25, -57
+poweradd = -1000
+
+[State 3000, Bat tu (tam thay sieu giap)]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 3000, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 80
+length = 8
+palbright = 80, 0, 0
+trans = add
+
+[State 3000, Tien moi nhat]
+type = PosAdd
+trigger1 = AnimElem = 6
+trigger2 = AnimElem = 9
+trigger3 = AnimElem = 12
+trigger4 = AnimElem = 15
+trigger5 = AnimElem = 18
+trigger6 = AnimElem = 21
+x = 5
+
+[State 3000, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 6
+trigger2 = AnimElem = 12
+trigger3 = AnimElem = 18
+trigger4 = AnimElem = 23
+value = 0, 1
+
+[State 3000, 6 nhat chem]
+type = HitDef
+trigger1 = AnimElem = 6
+trigger2 = AnimElem = 9
+trigger3 = AnimElem = 12
+trigger4 = AnimElem = 15
+trigger5 = AnimElem = 18
+trigger6 = AnimElem = 21
+attr = S, HA
+damage = 22, 2
+getpower = 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 3, 5
+sparkxy = -10, -65
+hitsound = 5, 1
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 6
+ground.hittime = 25
+ground.velocity = -1.5
+air.velocity = -1, -2.2
+air.hittime = 25
+
+[State 3000, Nhat cuoi hat van]
+type = HitDef
+trigger1 = AnimElem = 24
+attr = S, HA
+damage = 70, 4
+getpower = 0
+animtype = Hard
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 12, 14
+sparkxy = -10, -65
+hitsound = 5, 4
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 20
+ground.hittime = 30
+ground.velocity = -6, -5
+air.velocity = -6, -5
+fall = 1
+fall.recover = 0
+envshake.time = 15
+envshake.ampl = 4
+
+[State 3000, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ============================================================================
+; TUYỆT CHIÊU CẤP 3 (4000-4999) - phím S + I, 3000 power
+; ============================================================================
+; S + I - Phán Quyết Cuối Cùng (~380):
+;   4000: màn hình tối, lướt chém nhát đầu (40). Trượt -> hết chiêu.
+;   4010: trúng -> lướt xuyên qua lại 5 lần (5 x 48).
+;   4020: nhát chém lớn kết thúc (100), đối thủ ngã.
+[Statedef 4000]
+type    = S
+movetype= A
+physics = S
+juggle  = 2
+velset  = 0,0
+ctrl    = 0
+anim    = 4000
+sprpriority = 2
+
+[State 4000, Reset dem]
+type = VarSet
+trigger1 = Time = 0
+var(10) = 0
+
+[State 4000, Super pause]
+type = SuperPause
+trigger1 = Time = 0
+time = 45
+anim = 100
+sound = 20, 0
+pos = 25, -57
+poweradd = -3000
+
+[State 4000, Man hinh toi]
+type = BGPalFX
+trigger1 = 1
+time = 2
+mul = 70, 60, 60
+
+[State 4000, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4000, Xuyen qua]
+type = PlayerPush
+trigger1 = Time >= 3
+value = 0
+
+[State 4000, Luot]
+type = VelSet
+trigger1 = Time = [3,20]
+x = 11
+
+[State 4000, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 30
+length = 8
+palbright = 100, 0, 0
+trans = add
+
+[State 4000, Nhat dau]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, HA
+damage = 40, 3
+getpower = 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 6, 10
+sparkxy = -10, -60
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 0
+ground.hittime = 40
+ground.velocity = 0
+air.velocity = 0, -2
+air.hittime = 40
+
+[State 4000, Trung -> lien hoan]
+type = ChangeState
+trigger1 = MoveHit
+value = 4010
+
+[State 4000, Truot -> het]
+type = ChangeState
+trigger1 = Time >= 26
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Lướt xuyên qua lại: mỗi vòng 16 tick (quay mặt -> lướt -> chém -> dừng)
+[Statedef 4010]
+type    = S
+movetype= A
+physics = N
+ctrl    = 0
+anim    = 4010
+sprpriority = 2
+
+[State 4010, Man hinh toi]
+type = BGPalFX
+trigger1 = 1
+time = 2
+mul = 70, 60, 60
+
+[State 4010, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4010, Xuyen qua]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 4010, Du 5 lan -> ket thuc]
+type = ChangeState
+trigger1 = (Time % 16) = 0 && var(10) >= 5
+value = 4020
+
+[State 4010, Quay mat]
+type = Turn
+trigger1 = (Time % 16) = 0 && P2Dist X < 0
+
+[State 4010, Dem]
+type = VarAdd
+trigger1 = (Time % 16) = 0
+var(10) = 1
+
+[State 4010, Lao]
+type = VelSet
+trigger1 = (Time % 16) = 0
+x = 10
+y = 0
+
+[State 4010, Dung]
+type = VelSet
+trigger1 = (Time % 16) = 11
+x = 0
+y = 0
+
+[State 4010, Bong]
+type = AfterImage
+trigger1 = Time = 0
+time = 100
+length = 8
+palbright = 100, 0, 0
+trans = add
+
+[State 4010, Am thanh]
+type = PlaySnd
+trigger1 = (Time % 16) = 1
+value = 0, 1
+
+[State 4010, Vet chem]
+type = HitDef
+trigger1 = (Time % 16) = 1
+attr = S, HA
+damage = 48, 3
+getpower = 0
+animtype = Medium
+guardflag = MA
+hitflag = MAF
+priority = 6, Hit
+pausetime = 3, 6
+sparkxy = -10, -60
+hitsound = 5, 2
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 0
+ground.hittime = 30
+ground.velocity = 0
+air.velocity = 0, -2.5
+air.hittime = 30
+
+;---------------------------------------------------------------------------
+; Nhát chém lớn kết thúc
+[Statedef 4020]
+type    = S
+movetype= A
+physics = S
+ctrl    = 0
+velset  = 0,0
+anim    = 4020
+sprpriority = 2
+
+[State 4020, Quay mat]
+type = Turn
+trigger1 = Time = 0 && P2Dist X < 0
+
+[State 4020, Man hinh toi]
+type = BGPalFX
+trigger1 = AnimElemTime(6) < 0
+time = 2
+mul = 70, 60, 60
+
+[State 4020, Bat tu]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 4020, Am thanh]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = 0, 3
+
+[State 4020, Nhat ket thuc]
+type = HitDef
+trigger1 = AnimElem = 6
+attr = S, HA
+damage = 100, 5
+getpower = 0
+animtype = Hard
+guardflag = MA
+hitflag = MAF
+priority = 7, Hit
+pausetime = 15, 18
+sparkxy = -10, -65
+hitsound = 5, 4
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 20
+ground.hittime = 30
+ground.velocity = -7, -5
+air.velocity = -7, -5
+fall = 1
+fall.recover = 0
+envshake.time = 20
+envshake.ampl = 6
+
+[State 4020, Het]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; ============================================================================
+; STATE -2: chạy mỗi tick, kể cả khi bị đánh
+; ============================================================================
+[Statedef -2]
+
+; Phím nhảy: tắt nhảy bằng W (Up). Nhảy chỉ bằng K (xem nakroth.cmd).
+[State -2, Tat nhay bang W]
+type = AssertSpecial
+trigger1 = 1
+flag = NoJump
+flag2 = NoAirJump
+
+; --- Đếm giờ ---
+[State -2, Dem U lan 2]
+type = VarAdd
+trigger1 = var(0) > 0
+var(0) = -1
+
+[State -2, Dem cuong hoa J]
+type = VarAdd
+trigger1 = var(1) > 0
+var(1) = -1
+
+[State -2, Dem noi tai]
+type = VarAdd
+trigger1 = var(2) > 0
+var(2) = -1
+
+[State -2, Reset J tren khong]
+type = VarSet
+trigger1 = statetype != A
+var(4) = 0
+
+; --- Nội tại Thẩm Phán #2: chiêu U bất kỳ trúng -> 150 tick đánh J nhanh ---
+[State -2, Noi tai Tham Phan]
+type = VarSet
+trigger1 = (stateno = [1000,1399]) && MoveHit = 1
+var(2) = 150
+
+; --- Hiệu ứng báo trạng thái ---
+; Đang cường hóa J (S+U): nháy đỏ
+[State -2, Bao cuong hoa]
+type = PalFX
+trigger1 = var(1) > 0 && (GameTime % 12) < 6
+time = 1
+add = 110, 0, 0
+mul = 256, 190, 190
+
+; Đang tăng tốc (nội tại): ánh bạc nhẹ
+[State -2, Bao noi tai]
+type = PalFX
+trigger1 = var(2) > 0 && var(1) <= 0 && (GameTime % 16) < 8
+time = 1
+add = 40, 40, 55
+
+; ============================================================================
+; STATE -3
+; ============================================================================
+[Statedef -3]
+
+[State -3, Am tiep dat]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = stateno = 52
+trigger2 = stateno = 106
+value = 40, 0

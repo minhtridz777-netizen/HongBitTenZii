@@ -1,0 +1,19 @@
+<#f0f000>:Danh thuong:</>
+Chuoi song dao (4 nhat, nhat 4 hat tung)	^A ^A ^A ^A
+Chem hat								_U^A
+Quet chan								_D^A
+Chem cheo khong trung					_AIR^A
+
+<#f0f000>:Chieu U:</>
+Boi Tham Doan (bam lai trong 1 giay)	^X ^X
+Nguon Con Rac Roi						_D^X
+Phi Dao Thang Thien						_U^X
+Luot chem khong trung					_AIR^X
+
+<#f0f000>:Tuyet chieu:</>
+Guom Hanh Quyet <#bebebe>(1000)</>		^Y
+Phan Quyet Cuoi Cung <#bebebe>(3000)</>	_D^Y
+
+<#f0f000>:Di chuyen:</>
+Nhay									^B
+Luot toi / luot lui						^C / _B^C

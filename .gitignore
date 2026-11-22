@@ -1,0 +1,16 @@
+# File gốc của engine IKEMEN GO (Stable v1.0.0) - không đưa vào git.
+/Ikemen_GO.exe
+/LICENSES.txt
+/README.md
+/lib/
+/external/
+/font/
+/stages/
+/video/
+/sound/
+/chars/kfm*/
+# Trong data/ và save/ chỉ theo dõi file dự án có sửa
+/data/*
+!/data/select.def
+/save/*
+!/save/config.ini
