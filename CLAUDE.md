@@ -20,9 +20,19 @@
 ├── shared/
 │   └── char_template/         ← bộ khung nhân vật dùng chung (tạo sau nhân vật đầu tiên)
 ├── chars/<tên>/               ← file nhân vật: .def .cns .cmd .air .sff .snd
-├── tools/                     ← script Python sinh sprite/animation (xem tools/README.md)
+├── chars/bunhin/              ← Bù Nhìn: bao cát cho LAB / chế độ Training (không có đòn)
+├── LAB.exe                    ← phòng luyện tập: mở thẳng màn chọn tướng, đánh Bù Nhìn
+├── external/mods/lab.lua      ← logic LAB (mod của dự án, chỉ chạy khi có cờ -lab)
+├── tools/                     ← script Python sinh sprite/animation, chụp màn hình test (xem tools/README.md)
 └── data/select.def            ← danh sách nhân vật trong màn chọn (kiểm tra đúng vị trí)
 ```
+
+### LAB – phòng test tướng
+- Mở `LAB.exe` → chọn tướng (J) → vào trận với Bù Nhìn: không giới hạn thời gian, tự hồi máu và năng lượng.
+- Bảng thông tin góc trên trái: state/anim/ctrl, sát thương đòn cuối, combo, combo lớn nhất, lợi thế khung hình, var(0)–var(11).
+- Enter (người chơi 1) mở menu tạm dừng → chỉnh Bù Nhìn (đứng/ngồi/nhảy, đỡ đòn, thoát ngã, AI...), về màn chọn tướng.
+- `external/mods/lab.lua` là file của dự án (không phải file engine). `Ikemen_GO.exe` chạy bình thường thì mod không làm gì.
+- Tướng mới chỉ cần có trong `data/select.def` là hiện trong LAB.
 
 - Tên thư mục nhân vật: chữ thường, không dấu, không khoảng trắng (vd `nakroth`, `kael`).
 - **Bản thiết kế trong `designs/` là nguồn chuẩn.** Code làm đúng theo thiết kế; thay đổi gì thì cập nhật thiết kế trước.
@@ -156,3 +166,5 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 - 60 tick = 1 giây.
 - Kiểm tra load nhanh (không qua menu): `Ikemen_GO.exe -p1 <tên> -p2 kfm_zss -s stage0 -rounds 1 -windowed -nosound`.
   File nhân vật lỗi → engine thoát ngay với "panic"; chạy tiếp bình thường = load OK.
+- Claude tự xem hình trong game: `python tools/shot.py <tiền tố ảnh> <giây1,giây2,...> -- -lab -loadmotif -p1 <tên> -p2 bunhin -p1.ai 8 -s stage0 -rounds 1 -windowed -nosound`
+  (máy tự đánh Bù Nhìn, có bảng LAB, chụp cửa sổ game vào các giây chỉ định). Lưu ảnh vào thư mục tạm, không vào dự án.

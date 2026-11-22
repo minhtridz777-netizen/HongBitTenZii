@@ -8,6 +8,15 @@ Cần Python 3 + Pillow (`pip install pillow`). Chạy từ thư mục gốc d�
 | `airlib.py` | Đọc/ghi file animation .air (thư viện). |
 | `gen_slash_sff.py` | Vẽ vệt chém đỏ/bạc (nhóm sprite 8000–8099, bảng màu riêng 8000,1) và ghép vào SFF nguồn. |
 | `gen_nakroth_air.py` | Sinh `chars/nakroth/nakroth.air` từ `kfm.air` (anim chung + anim chiêu + anim vệt chém). |
+| `gen_bunhin.py` | Sinh Bù Nhìn (`chars/bunhin`): sprite KFM đổi màu rơm, anim chung, âm thanh. |
+| `shot.py` | Chạy engine với tham số, chụp cửa sổ game ở các giây chỉ định (kể cả khi bị che). Biến môi trường `SHOT_KEYS="7:J,9:J"` gửi phím vào cửa sổ game. |
+| `lab/LAB.cs`, `lab/build.ps1` | Mã nguồn + script biên dịch `LAB.exe` (dùng trình biên dịch C# có sẵn trong Windows). |
+
+Biên dịch lại LAB.exe:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/lab/build.ps1
+```
 
 Sinh lại sprite và animation của Nakroth:
 

@@ -22,10 +22,11 @@ anim     = nakroth.air
 sound    = nakroth.snd
 movelist = movelist.dat
 
+; Phím chọn tướng -> bảng màu. J (a) là phím chọn chính nên cho ra màu gốc.
 [Palette Keymap]
-x = 1
-y = 2
-z = 3
-a = 4
-b = 5
-c = 6
+a = 1
+b = 2
+c = 3
+x = 4
+y = 5
+z = 6

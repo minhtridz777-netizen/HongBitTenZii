@@ -3,7 +3,10 @@
 /LICENSES.txt
 /README.md
 /lib/
-/external/
+/external/*
+!/external/mods/
+/external/mods/*
+!/external/mods/lab.lua
 /font/
 /stages/
 /video/
