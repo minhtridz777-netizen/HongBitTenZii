@@ -14,7 +14,10 @@
 ; State trong file: 20 (đi), 40 (bắt đầu nhảy), 700/705/710/720 (lướt, nhảy đôi),
 ;                   800 (giữ S - thế đỡ), 860/865 (thoát combo S+L)
 ; Thể lực = guard points của engine (thanh dưới thanh máu), tối đa 1000:
-;   lướt -250 | đỡ trúng: engine trừ theo sát thương | hồi khi không đỡ | hết khi đỡ -> vỡ thế (engine)
+;   lướt đất -200 (20%), lướt trên không -300 (30%) | đỡ trúng: engine trừ theo sát thương
+;   hồi khi không đỡ | hết khi đỡ -> vỡ thế (engine)
+; Lướt kiểu Bleach vs Naruto: vụt qua người đối thủ, bất tử 4 tick đầu, có vệt mờ;
+;   đòn J (không làm ngã) trúng thì hủy sang lướt được (combo J J L ...).
 ; ============================================================================
 
 [Statedef -3]
@@ -108,27 +111,31 @@ trigger1 = stateno = [41,51] || stateno = 710 || stateno = 52
 trigger2 = stateno = [600,699] && movecontact
 value = 720
 
-; Lướt trên không: L khi đang bay (1 lần mỗi lần nhảy), tốn thể lực
+; Lướt trên không: L khi đang bay (1 lần mỗi lần nhảy), tốn 30% thể lực. Hủy được từ J trên không trúng đòn.
 [State -3, Luot tren khong]
 type = ChangeState
-triggerall = command = "L" && statetype = A && ctrl && var(0) = 0
-triggerall = guardpoints >= 250 && pos y < -12
-trigger1 = 1
+triggerall = command = "L" && statetype = A && var(0) = 0
+triggerall = guardpoints >= 300 && pos y < -12
+trigger1 = ctrl
+trigger2 = (stateno = [600,699]) && movecontact
 value = 710
 
-; Lướt lùi (A + L) / lướt tới (L) trên mặt đất, tốn thể lực
+; Lướt lùi (A + L) / lướt tới (L) trên mặt đất, tốn 20% thể lực.
+; Hủy được từ đòn J đất trúng đòn (200-239: chuỗi J, không gồm đòn hất W+J 240).
 [State -3, Luot lui]
 type = ChangeState
-triggerall = command = "back_L" && statetype = S && ctrl && command != "holddown"
-triggerall = guardpoints >= 250
-trigger1 = 1
+triggerall = command = "back_L" && statetype = S && command != "holddown"
+triggerall = guardpoints >= 200
+trigger1 = ctrl
+trigger2 = (stateno = [200,239]) && movecontact
 value = 705
 
 [State -3, Luot toi]
 type = ChangeState
-triggerall = command = "L" && statetype = S && ctrl && command != "holddown"
-triggerall = guardpoints >= 250
-trigger1 = 1
+triggerall = command = "L" && statetype = S && command != "holddown"
+triggerall = guardpoints >= 200
+trigger1 = ctrl
+trigger2 = (stateno = [200,239]) && movecontact
 value = 700
 
 ; Nhảy: K trên mặt đất (không giữ S - giữ S + K là xuống bậc, xem shared/system/platforms.zss)
@@ -219,8 +226,30 @@ sprpriority = 1
 [State 700, The luc]
 type = GuardPointsAdd
 trigger1 = Time = 0
-value = -250
+value = -200
 absolute = 1
+
+[State 700, Xuyen qua nguoi]
+type = PlayerPush
+trigger1 = Time <= 13
+value = 0
+
+[State 700, Bat tu dau]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 4
+
+[State 700, Vet mo]
+type = AfterImage
+trigger1 = Time = 0
+time = 12
+length = 6
+timegap = 1
+framegap = 2
+trans = add
+palbright = 30, 30, 60
+palcontrast = 100, 100, 160
 
 [State 700, Toc do]
 type = VelSet
@@ -239,13 +268,6 @@ removetime = -2
 sprpriority = 1
 ownpal = 1
 trans = add
-
-; Chạm người đối thủ phía trước (cùng độ cao) -> dừng ngay, không lướt xuyên qua
-[State 700, Cham doi thu]
-type = ChangeState
-trigger1 = P2BodyDist X <= 3 && P2Dist X > 0 && abs(P2Dist Y) < 30
-value = 0
-ctrl = 1
 
 [State 700, Het]
 type = ChangeState
@@ -266,7 +288,7 @@ sprpriority = 1
 [State 705, The luc]
 type = GuardPointsAdd
 trigger1 = Time = 0
-value = -250
+value = -200
 absolute = 1
 
 [State 705, Toc do]
@@ -304,8 +326,30 @@ var(0) = 1
 [State 710, The luc]
 type = GuardPointsAdd
 trigger1 = Time = 0
-value = -250
+value = -300
 absolute = 1
+
+[State 710, Xuyen qua nguoi]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 710, Bat tu dau]
+type = NotHitBy
+trigger1 = Time = 0
+value = SCA
+time = 4
+
+[State 710, Vet mo]
+type = AfterImage
+trigger1 = Time = 0
+time = 12
+length = 6
+timegap = 1
+framegap = 2
+trans = add
+palbright = 30, 30, 60
+palcontrast = 100, 100, 160
 
 [State 710, Huong]
 type = Turn
@@ -316,12 +360,6 @@ type = VelSet
 trigger1 = Time <= 10
 x = const(velocity.run.fwd.x)
 y = 0
-
-[State 710, Cham doi thu]
-type = ChangeState
-trigger1 = P2BodyDist X <= 3 && P2Dist X > 0 && abs(P2Dist Y) < 30
-value = 50
-ctrl = 1
 
 [State 710, Het]
 type = ChangeState

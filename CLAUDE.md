@@ -77,9 +77,10 @@ Bảng ký hiệu trong file thiết kế dùng phím của người chơi 1.
 
 ### Cơ chế chung (mọi nhân vật, nằm trong template)
 - **Đỡ (giữ S):** chặn mọi đòn từ phía trước mặt; bị đánh sau lưng thì trúng đòn.
-- **Thể lực** (thanh chung cho đỡ và lướt, tối đa 100): lướt −25; đỡ trúng đòn −(sát thương ÷ 4); hồi khi không đỡ không lướt;
+- **Thể lực** (thanh chung cho đỡ và lướt, tối đa 100): lướt đất −20, trên không −30; đỡ trúng đòn −(sát thương ÷ 4); hồi khi không đỡ không lướt;
   đang giữ S thì không hồi; hết thể lực khi đang đỡ → vỡ thế (choáng ~1 giây). Số liệu mặc định, chỉnh khi test.
 - **Thoát combo (S + L)** khi đang trúng đòn: tốn 1 thanh năng lượng, hình thức thoát tùy tướng.
+- **Lướt kiểu Bleach vs Naruto:** xuyên qua người đối thủ, bất tử đầu cú lướt, hủy được từ đòn J trúng.
 - **Nhảy đôi, lướt trên không**, lên/xuống bậc.
 
 ### Bộ khung lệnh chuẩn

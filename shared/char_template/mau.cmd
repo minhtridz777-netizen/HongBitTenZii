@@ -51,19 +51,19 @@ buffer.time = 4
 name = "down_J"
 command = /$D, a
 time = 1
-buffer.time = 5
+buffer.time = 1   ; 1 tick: tránh 1 lần bấm ra 2 đòn (engine giữ lần bấm trong lúc khựng hình nên vẫn nối chuỗi được)
 
 [Command]
 name = "up_J"
 command = /$U, a
 time = 1
-buffer.time = 5
+buffer.time = 1   ; 1 tick: tránh 1 lần bấm ra 2 đòn (engine giữ lần bấm trong lúc khựng hình nên vẫn nối chuỗi được)
 
 [Command]
 name = "J"
 command = a
 time = 1
-buffer.time = 5
+buffer.time = 1   ; 1 tick: tránh 1 lần bấm ra 2 đòn (engine giữ lần bấm trong lúc khựng hình nên vẫn nối chuỗi được)
 
 ;-| Di chuyển (khung.cns dùng) |----------------------------------------------
 [Command]

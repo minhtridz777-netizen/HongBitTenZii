@@ -52,7 +52,7 @@ Các con số dưới đây là mặc định, chỉnh sau khi test.
 | Việc | Thể lực |
 |---|---|
 | Tối đa | 100 |
-| Lướt (đất / trên không) | −25 mỗi lần; không đủ thì không lướt được |
+| Lướt đất / trên không | −20 / −30 mỗi lần (giống Bleach vs Naruto); không đủ thì không lướt được |
 | Đỡ trúng 1 đòn | −(sát thương đòn đó ÷ 4), tối thiểu −5 |
 | Hồi | +25 / giây khi **không đỡ và không lướt**; đang giữ S thì **không hồi** |
 | Hết thể lực khi đang đỡ | **Vỡ thế**: choáng ~1 giây, đối thủ đánh tự do |
@@ -64,6 +64,8 @@ Các con số dưới đây là mặc định, chỉnh sau khi test.
 
 ### 3.4 Di chuyển
 - Nhảy đôi (K lần 2 khi đang bay), lướt trên không (L khi đang bay, 1 lần mỗi lần nhảy).
+- **Lướt kiểu Bleach vs Naruto:** vụt **xuyên qua người** đối thủ, bất tử 4 tick đầu, có vệt mờ; cuối cú lướt có sơ hở.
+  Đòn J không làm ngã trúng thì **hủy sang lướt** được (combo J J L, J trên không → L trên không).
 - Lên bậc: nhảy lên rồi rơi xuống mặt bậc. Xuống bậc: S + K. Đi ra mép bậc thì rơi.
 
 ### 3.5 Năng lượng
