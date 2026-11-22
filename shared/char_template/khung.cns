@@ -231,7 +231,7 @@ x = const(velocity.run.fwd.x)
 type = Explod
 trigger1 = Time = 0
 anim = 8020
-pos = -10, 0
+pos = -8, 0
 postype = p1
 facing = -1
 bindtime = 1
@@ -239,6 +239,13 @@ removetime = -2
 sprpriority = 1
 ownpal = 1
 trans = add
+
+; Chạm người đối thủ phía trước (cùng độ cao) -> dừng ngay, không lướt xuyên qua
+[State 700, Cham doi thu]
+type = ChangeState
+trigger1 = P2BodyDist X <= 3 && P2Dist X > 0 && abs(P2Dist Y) < 30
+value = 0
+ctrl = 1
 
 [State 700, Het]
 type = ChangeState
@@ -309,6 +316,12 @@ type = VelSet
 trigger1 = Time <= 10
 x = const(velocity.run.fwd.x)
 y = 0
+
+[State 710, Cham doi thu]
+type = ChangeState
+trigger1 = P2BodyDist X <= 3 && P2Dist X > 0 && abs(P2Dist Y) < 30
+value = 50
+ctrl = 1
 
 [State 710, Het]
 type = ChangeState
@@ -388,7 +401,7 @@ value = 0
 type = Explod
 trigger1 = Time = 0
 anim = 8300
-pos = 0, -35
+pos = 0, -28
 postype = p1
 bindtime = 1
 removetime = -2
@@ -423,7 +436,7 @@ velset = 0,0
 type = Explod
 trigger1 = Time = 0
 anim = 8300
-pos = 0, -35
+pos = 0, -28
 postype = p1
 bindtime = 1
 removetime = -2

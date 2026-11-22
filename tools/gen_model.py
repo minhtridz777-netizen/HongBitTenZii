@@ -7,7 +7,7 @@ Tat ca so anim theo KHUNG_CHUAN.md. In ra elem co Clsn1 cua tung anim de dung tr
 import os, sys, io, math, struct
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw, ImageFilter
-from puppet import P, lerp, render, body_box, tip_box, make_palette, AXIS
+from puppet import P, lerp, render, body_box, tip_box, make_palette, AXIS, sbox, SCALE
 from sff2 import read_sff, write_sff
 
 out_dir, name = sys.argv[1], sys.argv[2]
@@ -15,6 +15,7 @@ main_c = tuple(int(v) for v in sys.argv[3].split(','))
 acc_c = tuple(int(v) for v in sys.argv[4].split(','))
 WITH_MOVES = '--no-moves' not in sys.argv
 
+NOSMOOTH = {1000, 860}  # anim co AnimElem duoc cns dung ma khong co Clsn1 -> khong chen khung
 ANIMS = []   # (no, frames, loop, comment) ; frame = (pose, time, opts)
 
 def A(no, frames, loop=None, comment=''):
@@ -107,26 +108,27 @@ A(5021, [F(CHIT, 8), F(CROUCH, 8)], comment='Ngoi bi danh vua')
 A(5022, [F(CHIT, 10), F(CROUCH, 10)], comment='Ngoi bi danh manh')
 for k in (5025, 5026, 5027):
     A(k, [F(CROUCH, 4)], comment='Ngoi hoi phuc')
-A(5030, [F(AIRHIT, -1)], comment='Bi danh tren khong')
+# Luu y: engine cho 'AnimTime = 0' o nhieu state bi danh -> thoi luong phai giong KFM (khong dung -1 bua bai)
+A(5030, [F(AIRHIT, 5)], comment='Bi danh tren khong')
 A(5035, [F(lerp(AIRHIT, FALL, .5), 4)], comment='Chuyen sang roi')
-A(5040, [F(AIRHIT, -1)], comment='Hoi phuc tren khong (khong nga)')
-A(5050, [F(FALL, -1)], comment='Roi nga ngua')
-A(5051, [F(lerp(FALL, BOUNCE, .5), -1)], comment='Roi nga (xuong)')
+A(5040, [F(AIRHIT, 6), F(lerp(AIRHIT, JUMP_FALL, .5), 6), F(JUMP_FALL, 6)], comment='Hoi phuc tren khong (khong nga)')
+A(5050, [F(FALL, 5), F(lerp(FALL, AIRHIT, .2), 5)], comment='Roi nga ngua')
+A(5051, [F(lerp(FALL, BOUNCE, .5), 3), F(lerp(FALL, BOUNCE, .6), 3)], comment='Roi nga (xuong)')
 A(5060, [F(FALL, -1)], comment='Roi')
 A(5061, [F(lerp(FALL, BOUNCE, .5), -1)], comment='Roi xuong')
 A(5070, [F(TRIP, 6), F(lerp(TRIP, LIE_FACE, .5), -1)], comment='Bi quet nga')
 A(5080, [F(BOUNCE, -1)], comment='Cham dat')
-A(5090, [F(BOUNCE, -1)], comment='Cham dat')
+A(5090, [F(BOUNCE, 7)], comment='Cham dat')
 A(5100, [F(BOUNCE, 4), F(lerp(BOUNCE, LIE, .5), 4)], comment='Dap dat')
-A(5101, [F(lerp(BOUNCE, FALL, .4), -1)], comment='Nay len')
-A(5110, [F(LIE, -1)], comment='Nam')
+A(5101, [F(BOUNCE, 4), F(lerp(BOUNCE, FALL, .4), 2)], comment='Dap dat (khi roi tu 5061)')
+A(5110, [F(LIE, 1)], comment='Nam')
 A(5120, [F(LIE, 4), F(GETUP1, 8), F(CROUCH, 8), F(lerp(CROUCH, STAND, .5), 6)], comment='Dung day')
-A(5150, [F(LIE, -1)], comment='Nam (thua)')
-A(5160, [F(lerp(LIE, BOUNCE, .3), 6), F(LIE, -1)], comment='Bi danh khi nam')
-A(5170, [F(lerp(LIE, BOUNCE, .3), 6), F(LIE, -1)], comment='Bi danh khi nam')
-A(5200, [F(CROUCH, 6), F(lerp(CROUCH, STAND, .5), 6)], comment='Tiep dat hoi phuc')
+A(5150, [F(LIE, 1)], comment='Nam (thua)')
+A(5160, [F(lerp(BOUNCE, FALL, .4), -1)], comment='Nay len khoi dat')
+A(5170, [F(lerp(LIE, BOUNCE, .3), 3)], comment='Cham dat lan 2')
+A(5200, [F(CROUCH, 3), F(lerp(CROUCH, STAND, .5), 4), F(lerp(CROUCH, STAND, .8), 4), F(STAND, -1)], comment='Tiep dat hoi phuc')
 spin = [P(y=-8, t=a, fa=(60, 90), ba=(20, 100), fl=(80, 120), bl=(50, 120)) for a in (0, 90, 180, 270)]
-A(5210, [F(s, 3) for s in spin] + [F(JUMP_FALL, -1)], comment='Lon hoi phuc tren khong')
+A(5210, [F(s, 3) for s in spin] + [F(s, 4) for s in spin], comment='Lon hoi phuc tren khong')
 A(5300, [F(DIZZY, 10), F(lerp(DIZZY, HIT1, .4), 10)], loop=0, comment='Choang')
 
 # ============================ ANIM BO CHIEU MAU ============================
@@ -153,7 +155,7 @@ if WITH_MOVES:
     A(200, [F(CHAMBER, 2), F(PUNCH_F, 3, c1='fha'), F(PUNCH_F, 2), F(lerp(PUNCH_F, STAND, .5), 4)], comment='J1 - dam tay truoc')
     A(210, [F(CHAMBER, 3), F(PUNCH_B, 3, c1='bha'), F(PUNCH_B, 3), F(lerp(PUNCH_B, STAND, .5), 5)], comment='J2 - dam tay sau')
     A(220, [F(lerp(STAND, KICK, .4), 3), F(KICK, 4, c1='fft'), F(KICK, 3), F(lerp(KICK, STAND, .5), 6)], comment='J3 - da day lui')
-    A(240, [F(UPPER0, 3), F(lerp(UPPER0, UPPER1, .5), 2, c1='fha'), F(UPPER1, 4, c1='fha'), F(UPPER1, 4), F(lerp(UPPER1, STAND, .5), 6)], comment='W+J - moc hat len')
+    A(240, [F(UPPER0, 3), F(lerp(UPPER0, UPPER1, .5), 2, box=sbox([-2, -72, 26, -28])), F(UPPER1, 4, box=sbox([-2, -72, 26, -28])), F(UPPER1, 4), F(lerp(UPPER1, STAND, .5), 6)], comment='W+J - moc hat len')
     A(400, [F(lerp(STAND, SWEEP, .5), 3), F(SWEEP, 4, c1='fft'), F(SWEEP, 4), F(lerp(SWEEP, CROUCH, .5), 6)], comment='S+J - quet chan')
     A(600, [F(lerp(JUMP_FALL, AIRKICK, .5), 2), F(AIRKICK, 6, c1='fft'), F(AIRKICK, -1)], comment='J tren khong - da cheo')
     A(610, [F(lerp(JUMP_FALL, AIRPUNCH, .5), 2), F(AIRPUNCH, 5, c1='fha'), F(AIRPUNCH, -1)], comment='J tren khong lan 2 - dam')
@@ -166,22 +168,22 @@ if WITH_MOVES:
     A(865, [F(CROUCH, 4), F(lerp(CROUCH, STAND, .5), 4)], comment='Thoat combo - hien ra')
     A(1000, [F(CHARGE, 6), F(PUSH, 4), F(PUSH, 10), F(lerp(PUSH, STAND, .5), 6)], comment='U - phong cau nang luong (dan o 8100)')
     A(1100, [F(lerp(STAND, DASH, .5), 3), F(DASH, 6), F(PUNCH_F, 4, c1='fha', big=True), F(PUNCH_F, 4), F(lerp(PUNCH_F, STAND, .5), 6)], comment='S+U - luot chem dat')
-    A(1200, [F(UPPER0, 3), F(UPPER1, 4, c1='fha', big=True), F(UPPER1, 6, c1='fha', big=True), F(JUMP_FALL, -1)], comment='W+U - moc bay len')
+    A(1200, [F(UPPER0, 3), F(UPPER1, 4, box=sbox([-2, -72, 26, -28])), F(UPPER1, 6, box=sbox([-2, -72, 26, -28])), F(JUMP_FALL, -1)], comment='W+U - moc bay len')
     A(1300, [F(lerp(JUMP_FALL, DIVE, .5), 3), F(DIVE, -1, c1='fft', big=True)], comment='U tren khong - lao xuong')
     A(1305, [F(lerp(STAND, CROUCH, .6), 6)], comment='U tren khong - tiep dat')
     # Tuyet chieu
     flurry = []
     for i in range(8):
         flurry += [F(CHAMBER, 1), F(PUNCH_F if i % 2 == 0 else PUNCH_B, 3, c1='fha' if i % 2 == 0 else 'bha', big=True)]
-    A(3000, [F(CHARGE, 8)] + flurry + [F(UPPER0, 3), F(UPPER1, 4, c1='fha', big=True), F(UPPER1, 10), F(lerp(UPPER1, STAND, .5), 6)],
+    A(3000, [F(CHARGE, 8)] + flurry + [F(UPPER0, 3), F(UPPER1, 4, box=sbox([-2, -72, 26, -28])), F(UPPER1, 10), F(lerp(UPPER1, STAND, .5), 6)],
       comment='I - dam lien hoan 8 nhat + moc hat len')
     A(3500, [F(CHARGE, 20)], comment='W+I - tu luc')
-    A(3510, [F(PUSH, 3, box=[20, -48, 330, -22])] * 1 + [F(lerp(PUSH, P(t=10, fa=(84, 0), ba=(78, 0), fl=ik(12), bl=ik(-12)), .5), 3, box=[20, -48, 330, -22])],
+    A(3510, [F(PUSH, 3, box=sbox([20, -48, 330, -22]))] * 1 + [F(lerp(PUSH, P(t=10, fa=(84, 0), ba=(78, 0), fl=ik(12), bl=ik(-12)), .5), 3, box=sbox([20, -48, 330, -22]))],
       loop=0, comment='W+I - ban tia (Clsn1 dai 310px)')
     A(3520, [F(lerp(PUSH, STAND, .5), 8)], comment='W+I - thu tay')
-    A(4000, [F(lerp(STAND, DASH, .5), 3)] + [F(DASH, 3, box=[-5, -60, 30, -10])] * 1 + [F(lerp(DASH, PUNCH_F, .5), 3, box=[-5, -60, 30, -10])],
+    A(4000, [F(lerp(STAND, DASH, .5), 3)] + [F(DASH, 3, box=sbox([-5, -60, 30, -10]))] * 1 + [F(lerp(DASH, PUNCH_F, .5), 3, box=sbox([-5, -60, 30, -10]))],
       loop=1, comment='S+I buoc 1 - lao toi')
-    A(4010, [F(AIRPUNCH, 3, box=[-10, -60, 40, -10]), F(P(y=-6, t=10, fa=(30, 90), ba=(95, 4), fl=(50, 80), bl=(10, 70)), 3, box=[-10, -60, 40, -10])],
+    A(4010, [F(AIRPUNCH, 3, box=sbox([-10, -60, 40, -10])), F(P(y=-6, t=10, fa=(30, 90), ba=(95, 4), fl=(50, 80), bl=(10, 70)), 3, box=sbox([-10, -60, 40, -10]))],
       loop=0, comment='S+I buoc 2 - dam lien hoan tren khong')
     A(4020, [F(SLAM0, 8), F(SLAM, 4, c1='fha', big=True), F(SLAM, -1)], comment='S+I buoc 3 - dap xuong')
     A(4030, [F(lerp(STAND, CROUCH, .6), 10), F(lerp(CROUCH, WIN, .4), 10), F(STAND, 6)], comment='S+I ket thuc')
@@ -191,10 +193,34 @@ pal_char = make_palette(main_c, acc_c)
 ALT = [(main_c, acc_c), ((200, 60, 60), (240, 200, 60)), ((60, 90, 200), (240, 240, 240)),
        ((60, 160, 80), (230, 160, 40)), ((230, 200, 70), (60, 60, 70)), ((140, 70, 180), (90, 230, 220))]
 
+def smooth(no, frames, loop):
+    """Chen khung trung gian cho muot. Chi lam o doan SAU khung danh cuoi cung (khong doi so elem ma cns dung)."""
+    if no in NOSMOOTH:
+        return frames, loop
+    hits = [i for i, f in enumerate(frames) if 'c1' in f[2] or 'box' in f[2]]
+    last = hits[-1] if hits else -1
+    out, newidx = [], {}
+    for i, (p, t, o) in enumerate(frames):
+        newidx[i] = len(out)
+        if i <= last or t < 4:
+            out.append((p, t, o)); continue
+        if i + 1 < len(frames):
+            nxt = frames[i + 1][0]
+        elif loop is not None:
+            nxt = frames[loop][0]
+        else:
+            out.append((p, t, o)); continue
+        n = min(4, t // 2)
+        base, rem = divmod(t, n)
+        for j in range(n):
+            out.append((lerp(p, nxt, j / n), base + (1 if j < rem else 0), o))
+    return out, (newidx[loop] if loop is not None else None)
+
 sprites, info, air = [], [], []
 air.append('; MODEL TEST - sinh bang tools/gen_model.py (khong sua tay)\n')
 air.append('; So anim theo designs/KHUNG_CHUAN.md. Clsn2 tu dong theo than, Clsn1 theo tay/chan ra don.\n\n')
 for no, frames, loop, comment in ANIMS:
+    frames, loop = smooth(no, frames, loop)
     hits = []
     air.append('; %s\n[Begin Action %d]\n' % (comment, no))
     for i, (pose, t, o) in enumerate(frames):
@@ -220,9 +246,11 @@ for no, frames, loop, comment in ANIMS:
 # ---- Anh dai dien: 9000,0 (nho, mat) va 9000,1 (lon, ca nguoi) ----
 _im, _S = render(STAND)
 hx, hy = int(_S['head'][0]), int(_S['head'][1])
-face = _im.crop((hx - 12, hy - 11, hx + 12, hy + 13)).resize((72, 72), Image.NEAREST)
+face = _im.crop((hx - 10, hy - 9, hx + 10, hy + 11)).resize((50, 50), Image.NEAREST)  # khung thanh mau: 50x50
 sprites.append(dict(g=9000, n=0, img=face, ax=(0, 0), portrait=True))
-full = _im.crop((24, 20, 88, 104)).resize((192, 252), Image.NEAREST)
+bb = _im.getbbox()
+cx = (bb[0] + bb[2]) // 2
+full = _im.crop((cx - 24, bb[1] - 4, cx + 24, bb[1] + 52)).resize((240, 280), Image.NEAREST)  # man chon: 240x280
 sprites.append(dict(g=9000, n=1, img=full, ax=(0, 0), portrait=True))
 
 # ---- Hieu ung (nhom 8000+, bang mau rieng 8000,1, ve de dung trans = add) ----

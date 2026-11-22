@@ -11,7 +11,7 @@
 |---|---|
 | Độ phân giải game | 1280×720 (16:9) |
 | Hệ toạ độ (localcoord) | **640×360** cho cả nhân vật và map → đơn vị toạ độ trùng nhau |
-| Chiều cao nhân vật | ~70 px (≈ 1/5 màn hình). Nhân vật to con tối đa ~90 px |
+| Chiều cao nhân vật | ~56 px (≈ 1/6 màn hình). Nhân vật to con tối đa ~72 px |
 | Phong cách | Ít chi tiết, khối màu rõ, viền đậm. **Hiệu ứng chiêu là phần đẹp nhất** |
 | Map | Rộng 2–3 màn hình, có bậc lơ lửng (nhảy lên, S+K xuống), nền nhiều lớp trôi chậm |
 | Camera | Luôn ở giữa 2 nhân vật; đi xa nhau thì thu nhỏ (tối đa 0.8); nhảy lên cao thì camera theo |
@@ -109,7 +109,7 @@ Các con số dưới đây là mặc định, chỉnh sau khi test.
 | 10. Âm thanh, AI máy đánh, cân bằng, ảnh đại diện, danh sách chiêu | Claude | |
 | 11. **Duyệt cuối** → cập nhật Roster, commit | Người dùng / Claude | |
 
-Model test: búp bê khớp nối ít chi tiết, cao ~70 px, đủ mọi động tác chuẩn, **đổi màu theo từng nhân vật**.
+Model test: búp bê khớp nối ít chi tiết, cao ~56 px, đủ mọi động tác chuẩn, **đổi màu theo từng nhân vật**.
 Số animation theo quy ước → khi thay model chuẩn không phải sửa logic.
 
 ---

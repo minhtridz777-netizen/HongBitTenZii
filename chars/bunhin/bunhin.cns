@@ -15,18 +15,19 @@ IntPersistIndex = 60
 FloatPersistIndex = 40
 
 [Size]
+; Ti le model test 0.8 (nhan vat cao ~56 px trong he 640x360)
 xscale = 1
 yscale = 1
-ground.back = 8
-ground.front = 9
-air.back = 7
-air.front = 7
-height = 50
-attack.dist = 120
+ground.back = 7
+ground.front = 7
+air.back = 6
+air.front = 6
+height = 40
+attack.dist = 100
 proj.attack.dist = 200
 proj.doscale = 0
-head.pos = 2, -62
-mid.pos = 0, -40
+head.pos = 2, -50
+mid.pos = 0, -32
 shadowoffset = 0
 draw.offset = 0,0
 

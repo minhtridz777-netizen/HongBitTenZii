@@ -47,7 +47,7 @@
 > Phần dưới đây là tóm tắt; mâu thuẫn thì theo KHUNG_CHUAN.md.
 
 ### Hình ảnh
-- Game 1280×720, hệ toạ độ **640×360** cho cả nhân vật và map. Nhân vật cao ~70 px (≈1/5 màn hình), ít chi tiết, hiệu ứng đẹp.
+- Game 1280×720, hệ toạ độ **640×360** cho cả nhân vật và map. Nhân vật cao ~56 px (≈1/6 màn hình), ít chi tiết, hiệu ứng đẹp.
 - Map rộng 2–3 màn hình, có bậc lơ lửng (code chung `shared/system/platforms.zss`, map khai báo bậc ở `[Constants]`).
 - Camera giữa 2 nhân vật, xa nhau thì thu nhỏ.
 
@@ -173,7 +173,7 @@ Chi tiết ở `designs/KHUNG_CHUAN.md` mục 5. Các bước **in đậm** là 
 ## Lộ trình dự án
 - [x] Chốt phím nhảy (K), LAB, thử bậc + camera (map `lab_bac`)
 - [x] Khung chuẩn (`designs/KHUNG_CHUAN.md`)
-- [x] Model test (búp bê khớp nối ~70 px) + `shared/char_template/` có đủ cơ chế chung, chạy trong LAB
+- [x] Model test (búp bê khớp nối ~56 px) + `shared/char_template/` có đủ cơ chế chung, chạy trong LAB
 - [ ] Map đầu tiên theo tỉ lệ mới (640×360, có bậc)
 - [ ] Nhân vật đầu tiên theo quy trình mới
 - [ ] Thêm nhân vật 2–4 (dùng template)

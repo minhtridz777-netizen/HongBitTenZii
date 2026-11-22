@@ -18,12 +18,16 @@ C_HEAD = 6     # dau
 C_HEAD_D = 7
 C_EYE = 8      # kinh mat (cho biet huong mat)
 
+# ---- ti le: 1.0 = cao ~70 px; 0.8 = cao ~56 px (chot sau khi test) ----
+SCALE = 0.8
 # ---- kich thuoc xuong (px) ----
-TORSO, NECK = 21, 2
-HEAD_R = 7
-UARM, FARM = 11, 10
-THIGH, SHIN = 15, 15
-HIP_Y = -32
+TORSO, NECK = 21 * SCALE, 2 * SCALE
+HEAD_R = round(7 * SCALE)
+UARM, FARM = 11 * SCALE, 10 * SCALE
+THIGH, SHIN = 15 * SCALE, 15 * SCALE
+HIP_Y = -32 * SCALE
+# do day net ve (px)
+W_TORSO, W_UARM, W_FARM, W_THIGH, W_SHIN, W_FOOT = 8, 4, 3, 5, 4, 3
 
 DEFAULT = dict(
     x=0, y=2,          # dich hong (y + = thap xuong)
@@ -61,7 +65,7 @@ def _pt(o, ang, ln):
     return (o[0] + math.sin(a) * ln, o[1] + math.cos(a) * ln)
 
 def skeleton(p):
-    ox, oy = AXIS[0] + p['x'], AXIS[1] + p['y']
+    ox, oy = AXIS[0] + p['x'] * SCALE, AXIS[1] + p['y'] * SCALE
     hip = (ox, oy + HIP_Y)
     t = math.radians(p['t'])
     neck = (hip[0] + math.sin(t) * TORSO, hip[1] - math.cos(t) * TORSO)
@@ -75,7 +79,7 @@ def skeleton(p):
         S[side + 'el'], S[side + 'ha'] = el, ha
     for side, key in (('f', 'fl'), ('b', 'bl')):
         if isinstance(p[key][0], str):  # IK: dat co chan vao diem chi dinh, goi gap ve phia truoc
-            tx, ty = AXIS[0] + p[key][1], AXIS[1] + p[key][2]
+            tx, ty = AXIS[0] + p[key][1] * SCALE, AXIS[1] + p[key][2] * SCALE
             dx, dy = tx - hip[0], ty - hip[1]
             d = max(1.0, min(THIGH + SHIN - 0.01, math.hypot(dx, dy)))
             at = math.degrees(math.atan2(dx, dy))
@@ -87,7 +91,7 @@ def skeleton(p):
             a1, k = p[key]
             kn = _pt(hip, a1, THIGH)
             an = _pt(kn, a1 - k, SHIN)
-        ft = (an[0] + 5, an[1])
+        ft = (an[0] + 4, an[1])
         S[side + 'kn'], S[side + 'an'], S[side + 'ft'] = kn, an, ft
     return S
 
@@ -108,27 +112,27 @@ def render(p):
     d = ImageDraw.Draw(img)
     S = skeleton(p)
     # chi sau
-    _seg(d, S['sh'], S['bel'], 5, C_MAIN_D); _seg(d, S['bel'], S['bha'], 4, C_MAIN_D)
-    _seg(d, S['hip'], S['bkn'], 6, C_MAIN_D); _seg(d, S['bkn'], S['ban'], 5, C_MAIN_D)
-    _seg(d, S['ban'], S['bft'], 3, C_ACC_D)
+    _seg(d, S['sh'], S['bel'], W_UARM, C_MAIN_D); _seg(d, S['bel'], S['bha'], W_FARM, C_MAIN_D)
+    _seg(d, S['hip'], S['bkn'], W_THIGH, C_MAIN_D); _seg(d, S['bkn'], S['ban'], W_SHIN, C_MAIN_D)
+    _seg(d, S['ban'], S['bft'], W_FOOT, C_ACC_D)
     # than + dai lung
-    _seg(d, S['hip'], S['neck'], 10, C_MAIN)
+    _seg(d, S['hip'], S['neck'], W_TORSO, C_MAIN)
     bx, by = S['hip']
-    d.line([(bx - 5, by - 2), (bx + 5, by - 2)], fill=C_ACC, width=3)
+    d.line([(bx - 4, by - 2), (bx + 4, by - 2)], fill=C_ACC, width=2)
     # chan truoc
-    _seg(d, S['hip'], S['fkn'], 6, C_MAIN); _seg(d, S['fkn'], S['fan'], 5, C_MAIN)
-    _seg(d, S['fan'], S['fft'], 3, C_ACC)
+    _seg(d, S['hip'], S['fkn'], W_THIGH, C_MAIN); _seg(d, S['fkn'], S['fan'], W_SHIN, C_MAIN)
+    _seg(d, S['fan'], S['fft'], W_FOOT, C_ACC)
     # dau + kinh mat (huong mat)
     hx, hy = S['head']
     d.ellipse([hx - HEAD_R - 1, hy - HEAD_R - 1, hx + HEAD_R + 1, hy + HEAD_R + 1], fill=C_OUT)
     d.ellipse([hx - HEAD_R, hy - HEAD_R, hx + HEAD_R, hy + HEAD_R], fill=C_HEAD)
     d.rectangle([hx + 1, hy - 2, hx + HEAD_R, hy + 1], fill=C_EYE)
-    d.line([(hx - HEAD_R + 1, hy + 3), (hx - 2, hy + 5)], fill=C_HEAD_D, width=2)
+    d.line([(hx - HEAD_R + 1, hy + 2), (hx - 2, hy + 4)], fill=C_HEAD_D, width=1)
     # tay truoc
-    _seg(d, S['sh'], S['fel'], 5, C_MAIN); _seg(d, S['fel'], S['fha'], 4, C_MAIN)
+    _seg(d, S['sh'], S['fel'], W_UARM, C_MAIN); _seg(d, S['fel'], S['fha'], W_FARM, C_MAIN)
     q = S['fha']
-    d.ellipse([q[0] - 3, q[1] - 3, q[0] + 3, q[1] + 3], fill=C_OUT)
-    d.ellipse([q[0] - 2, q[1] - 2, q[0] + 2, q[1] + 2], fill=C_ACC)
+    d.ellipse([q[0] - 2.5, q[1] - 2.5, q[0] + 2.5, q[1] + 2.5], fill=C_OUT)
+    d.ellipse([q[0] - 1.5, q[1] - 1.5, q[0] + 1.5, q[1] + 1.5], fill=C_ACC)
     return img, S
 
 def body_box(img):
@@ -140,10 +144,15 @@ def body_box(img):
     return [x0 - AXIS[0] + 3, y0 - AXIS[1] + 2, x1 - AXIS[0] - 3, y1 - AXIS[1]]
 
 def tip_box(S, part, w=14, h=12):
-    """Clsn1 quanh dau tay/chan: part = 'fha','bha','fft','bft','fkn'..."""
+    """Clsn1 quanh dau tay/chan: part = 'fha','bha','fft','bft','fkn'... (w, h tinh theo ti le 1.0)"""
     x, y = S[part]
     x, y = x - AXIS[0], y - AXIS[1]
+    w, h = w * SCALE, h * SCALE
     return [int(x - w / 2 + 2), int(y - h / 2), int(x + w / 2 + 2), int(y + h / 2)]
+
+def sbox(b):
+    """Doi hop toa do viet o ti le 1.0 sang ti le hien tai."""
+    return [int(round(v * SCALE)) for v in b]
 
 def make_palette(main, acc, head=(230, 220, 200), eye=(60, 230, 255)):
     def shade(c, k):

@@ -6,7 +6,7 @@
 #   plat.count = N                 ; số bậc (tối đa 8)
 #   plat1.x1 = -300                ; mép trái (x của map, 0 = giữa map)
 #   plat1.x2 = -210                ; mép phải
-#   plat1.y  = -28                 ; độ cao mặt trên (âm = cao hơn mặt đất)
+#   plat1.y  = -60                 ; độ cao mặt trên (âm = cao hơn mặt đất). Bậc phải cao ít nhất 40.
 #
 # Cách hoạt động (dùng GroundLevelOffset của IKEMEN):
 #   - Đang rơi / đứng mà chân ở trên mặt bậc -> mặt bậc thành "mặt đất" của nhân vật.
@@ -16,9 +16,9 @@
 # ==============================================================================
 
 # Trả về độ cao mặt đất mới: bậc gần nhất nằm dưới chân (nhỏ nhất trong các bậc mà chân đang ở trên)
-[Function MF_PlatPick(x1, x2, py, ax, ay, best) ret]
+[Function MF_PlatPick(x1, x2, py, ax, ay, best, tol) ret]
 let ret = $best;
-if $x1 < $x2 && $ax >= $x1 && $ax <= $x2 && $ay <= $py + 1 && $py < $ret {
+if $x1 < $x2 && $ax >= $x1 && $ax <= $x2 && $ay <= $py + $tol && $py < $ret {
 	let ret = $py;
 }
 
@@ -33,16 +33,18 @@ ignoreHitPause if !isHelper && stageConst(plat.count) > 0 {
 		mapAdd{map: "_mf_platDrop"; value: -1}
 	}
 
+	# Đang bị đánh (ngã): engine chỉ tính chạm đất khi chân xuống dưới mặt đất ~25 -> bậc giữ thêm 30
+	let tol = ifElse(moveType = H, 30, 1);
 	let best = 0;
 	if map(_mf_platDrop) <= 0 {
-		let best = call MF_PlatPick(stageConst(plat1.x1), stageConst(plat1.x2), stageConst(plat1.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat2.x1), stageConst(plat2.x2), stageConst(plat2.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat3.x1), stageConst(plat3.x2), stageConst(plat3.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat4.x1), stageConst(plat4.x2), stageConst(plat4.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat5.x1), stageConst(plat5.x2), stageConst(plat5.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat6.x1), stageConst(plat6.x2), stageConst(plat6.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat7.x1), stageConst(plat7.x2), stageConst(plat7.y), $ax, $ay, $best);
-		let best = call MF_PlatPick(stageConst(plat8.x1), stageConst(plat8.x2), stageConst(plat8.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat1.x1), stageConst(plat1.x2), stageConst(plat1.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat2.x1), stageConst(plat2.x2), stageConst(plat2.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat3.x1), stageConst(plat3.x2), stageConst(plat3.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat4.x1), stageConst(plat4.x2), stageConst(plat4.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat5.x1), stageConst(plat5.x2), stageConst(plat5.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat6.x1), stageConst(plat6.x2), stageConst(plat6.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat7.x1), stageConst(plat7.x2), stageConst(plat7.y), $ax, $ay, $best, $tol);
+		let best = call MF_PlatPick(stageConst(plat8.x1), stageConst(plat8.x2), stageConst(plat8.y), $ax, $ay, $best, $tol);
 	}
 
 	# Đứng trên bậc + giữ S + bấm K -> xuống bậc
@@ -53,7 +55,10 @@ ignoreHitPause if !isHelper && stageConst(plat.count) > 0 {
 		selfState{value: 50; ctrl: 1}
 	}
 
-	groundLevelOffset{value: $best}
+	# Chỉ dời mặt đất khi đang ở trên bậc (hoặc cần trả về 0) - ở mặt đất thật thì để engine tự xử lý
+	if $best != 0 || groundLevel != 0 {
+		groundLevelOffset{value: $best}
+	}
 
 	# Đi ra khỏi mép bậc khi đang đứng / đi / đỡ -> rơi xuống
 	if stateType != A && $ay < $best - 1 {
