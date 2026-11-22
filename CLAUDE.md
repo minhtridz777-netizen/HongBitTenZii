@@ -6,7 +6,8 @@
 - **Claude**: biến ý tưởng thành bản thiết kế, viết toàn bộ file nhân vật, sửa theo nhận xét.
 - Engine: **IKEMEN GO bản Stable** (Windows 64-bit). Thư mục này là thư mục gốc của IKEMEN GO.
 - Giao tiếp với người dùng bằng **tiếng Việt**, ngắn gọn, dễ hiểu.
-- **Người dùng nói "tạo tướng <tên>" → làm đúng theo `designs/QUY_TRINH_TAO_TUONG.md`** (tự tra cứu, viết thiết kế, dừng ở các bước duyệt ✅).
+- **Người dùng nói "tạo tướng <tên>" (hoặc lệnh `/tao-tuong <tên>`) → làm đúng theo `designs/QUY_TRINH_TAO_TUONG.md`** (tự tra cứu, viết thiết kế, dừng ở các bước duyệt ✅).
+  Bước tra cứu + gợi ý bộ chiêu giao cho agent `nghien-cuu-tuong` (`.claude/agents/`).
 
 ---
 
@@ -30,6 +31,9 @@
 ├── LAB.exe                    ← phòng luyện tập: mở thẳng màn chọn tướng, đánh Bù Nhìn
 ├── external/mods/lab.lua      ← logic LAB (mod của dự án, chỉ chạy khi có cờ -lab)
 ├── tools/                     ← script Python sinh sprite/animation, chụp màn hình test (xem tools/README.md)
+├── .claude/skills/tao-tuong/  ← lệnh tắt /tao-tuong <tên>
+├── .claude/agents/            ← agent nghien-cuu-tuong (tra cứu + gợi ý bộ chiêu)
+├── .github/CONTRIBUTING.md    ← quy tắc nhánh, commit, Pull Request
 └── data/select.def            ← danh sách nhân vật trong màn chọn (kiểm tra đúng vị trí)
 ```
 
