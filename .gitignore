@@ -14,3 +14,5 @@
 !/data/select.def
 /save/*
 !/save/config.ini
+/tools/preview/
+__pycache__/

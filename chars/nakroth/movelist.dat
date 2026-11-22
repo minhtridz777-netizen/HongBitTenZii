@@ -1,14 +1,21 @@
-<#f0f000>:Danh thuong:</>
-Chuoi song dao (4 nhat, nhat 4 hat tung)	^A ^A ^A ^A
-Chem hat								_U^A
-Quet chan								_D^A
-Chem cheo khong trung					_AIR^A
+<#f0f000>:Noi tai - Tham Phan Oai Nghiem:</>
+Don J trung thu 4 hat tung (dao loe do bao truoc)
+Chieu U trung / dung Nguon Con Rac Roi: danh nhanh 2,5 giay
 
-<#f0f000>:Chieu U:</>
-Boi Tham Doan (bam lai trong 1 giay)	^X ^X
-Nguon Con Rac Roi						_D^X
-Phi Dao Thang Thien						_U^X
-Luot chem khong trung					_AIR^X
+<#f0f000>:Danh thuong:</>
+Chuoi song dao							^A ^A ^A ^A
+Vay dao (hat tung)						_U^A
+Quet dao thap							_D^A
+Bo dao tren khong						_AIR^A
+
+<#f0f000>:Boi Tham Doan:</>
+Lan 1: lao toi hat tung					^X
+Lan 1: cheo len / cheo xuong			_U^X / _AIR^X
+Lan 2 (trong 5 giay): lao toi			^X
+Lan 2 (trong 5 giay): luot lui			_B^X
+
+<#f0f000>:Nguon Con Rac Roi:</>
+Lon nguoc, J ke tiep chem quet			_D^X
 
 <#f0f000>:Tuyet chieu:</>
 Guom Hanh Quyet <#bebebe>(1000)</>		^Y

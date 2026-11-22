@@ -1,8 +1,8 @@
-# NAKROTH – Bản thiết kế nhân vật (v2, CHỜ DUYỆT)
+# NAKROTH – Bản thiết kế nhân vật (v2, đã duyệt)
 
 > Nhân vật dựa trên tướng Nakroth (Liên Quân Mobile). Dự án cá nhân, phi lợi nhuận.
 > Lối chơi: **sát thủ song đao, lướt liên tục, chém nhanh, máu mỏng.**
-> Trạng thái: **v2 chờ người dùng duyệt**. Code hiện tại (`chars/nakroth/`) vẫn theo v1.
+> Trạng thái: **v2 đã duyệt và đã dựng code** (`chars/nakroth/`), chờ người dùng test.
 
 ---
 
@@ -61,7 +61,8 @@ Dùng bảng phím chuẩn trong `CLAUDE.md` (P1: WASD + JKLUIO, P2: mũi tên +
 
 1. **Đòn J thứ 4 hất tung** (đúng bản gốc): có bộ đếm số đòn J **trúng** (đứng, ngồi, trên không đều tính). Cứ đến đòn thứ 4 thì đòn đó hất tung, rồi đếm lại.
    - Khi đòn kế tiếp là đòn thứ 4 → hai đao lóe đỏ để người chơi biết.
-   - Đánh đủ chuỗi `J J J J` từ đầu thì nhát 4 luôn hất tung.
+   - Bộ đếm về 0 nếu **2 giây** không đánh trúng đòn J nào → đánh đủ chuỗi `J J J J` từ đầu thì nhát 4 hất tung.
+   - `W + J` luôn hất tung (không cần là đòn thứ 4). Đòn chém quét cường hóa được đếm nhưng không đổi thành hất tung.
 2. **Tăng tốc đánh:** khi chiêu U bất kỳ trúng đối thủ, **hoặc khi dùng `S + U`** → 150 tick (2,5 giây) các đòn J nhanh hơn ~50%. Có ánh bạc trên người khi đang tăng tốc.
 
 ---
@@ -124,7 +125,18 @@ Tái hiện đúng **combo kinh điển** của Nakroth trong một chiêu, màn
 
 ---
 
-## 9. Thay đổi so với v1
+## 9. Ghi chú kỹ thuật (bản dựng v2)
+
+- **Siêu giáp `I`:** `HitOverride` với `keepstate = 1` (bị trúng không đổi state) + `DefenceMulSet 0.7`.
+  Wiki IKEMEN không ghi rõ `keepstate` của HitOverride có trừ máu hay không → **cần test #5**.
+  Nếu bị trúng mà không mất máu, hoặc bị đánh văng khỏi chiêu, báo lại để đổi cách làm.
+- **Vệt chém:** Claude tự vẽ (sprite 8000–8099, bảng màu riêng) và đóng vào `nakroth.sff`.
+  Công cụ sinh lại nằm ở `tools/` (xem `tools/README.md`).
+- Hồi chiêu U / S+U chưa có biểu tượng trên màn hình. Cần thì làm sau.
+
+---
+
+## 10. Thay đổi so với v1
 
 | Mục | v1 | v2 (đúng bản gốc hơn) |
 |---|---|---|

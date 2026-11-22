@@ -20,6 +20,7 @@
 ├── shared/
 │   └── char_template/         ← bộ khung nhân vật dùng chung (tạo sau nhân vật đầu tiên)
 ├── chars/<tên>/               ← file nhân vật: .def .cns .cmd .air .sff .snd
+├── tools/                     ← script Python sinh sprite/animation (xem tools/README.md)
 └── data/select.def            ← danh sách nhân vật trong màn chọn (kiểm tra đúng vị trí)
 ```
 
@@ -134,7 +135,7 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 
 | Nhân vật | Thiết kế | Giai đoạn | Ghi chú |
 |---|---|---|---|
-| Nakroth | `designs/NAKROTH_DESIGN.md` (**v2 chờ duyệt**) | Code đang theo v1 (hình tạm KFM) | v2 làm lại cho đúng bộ chiêu Liên Quân. Duyệt xong mới sửa code |
+| Nakroth | `designs/NAKROTH_DESIGN.md` (v2 đã duyệt) | Đã dựng v2 (hình tạm KFM + vệt chém tự vẽ) – chờ test | Load OK, trận AI-đấu-AI chạy không lỗi. Cần kiểm tra siêu giáp `I` |
 
 ## Lộ trình dự án
 - [ ] Nhân vật đầu tiên (Nakroth) chơi được hoàn chỉnh với hình tạm
