@@ -162,7 +162,11 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 1. **Không sửa file của engine** (exe, `external/script/`, dữ liệu mặc định) trừ khi thật sự cần và đã hỏi người dùng.
 2. **Không cập nhật phiên bản engine** giữa chừng.
 3. Không chắc cú pháp CNS/CMD/AIR hay tính năng IKEMEN: tra wiki chính thức `github.com/ikemen-engine/Ikemen-GO/wiki` và xem file của KFM (`chars/kfm/`), không đoán.
-4. Dùng **Git**: commit sau mỗi bước chạy được, message ngắn tiếng Việt, ghi rõ tên nhân vật (vd `nakroth: thêm chiêu U tái kích hoạt`).
+4. Dùng **Git** theo `.github/CONTRIBUTING.md`:
+   - Nhánh chính khi phát triển là **`develop`** (mặc định). `main` = bản ổn định, chỉ nhận Pull Request từ `develop`.
+   - Mỗi việc một nhánh tách từ `develop`: `tuong/<ten>`, `map/<ten>`, `khung/<mo-ta>`, `sua/<mo-ta>`, `cong-cu/<mo-ta>`, `giao-dien/<mo-ta>`, `tai-lieu/<mo-ta>`.
+   - Commit sau mỗi bước chạy được, message `<phạm vi>: <làm gì>` tiếng Việt (vd `ichigo: thêm chiêu U tái kích hoạt`).
+   - Đẩy nhánh lên và mở Pull Request vào `develop` khi người dùng đồng ý; không đẩy thẳng vào `main`.
 5. Sau mỗi lần sửa: kiểm tra nhân vật load được, sửa hết lỗi cú pháp rồi mới báo người dùng test.
 6. **Claude không tự chơi được game.** Sau mỗi bước, đưa người dùng danh sách ngắn "cần test gì", chờ nhận xét rồi chỉnh.
 7. Comment trong code bằng tiếng Việt, ghi rõ chiêu nào nằm ở đâu.

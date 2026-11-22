@@ -16,7 +16,7 @@ Nhân vật được thiết kế và viết code cùng Claude (Claude Code) –
    git init
    git remote add origin <link repo này>
    git fetch origin
-   git checkout -f -b main --track origin/main
+   git checkout -f -b develop --track origin/develop
    ```
 3. Chạy:
    - `LAB.exe` – phòng test tướng: chọn tướng, đánh Bù Nhìn, có bảng sát thương/combo.
@@ -38,6 +38,7 @@ Công cụ sinh hình/map (tuỳ chọn): Python 3 + `pip install pillow` – xe
 | File | Nội dung |
 |---|---|
 | `CLAUDE.md` | Quy tắc dự án (Claude đọc file này đầu tiên) |
+| `.github/CONTRIBUTING.md` | **Quy tắc nhánh, commit, Pull Request** – đọc trước khi đóng góp |
 | `designs/KHUNG_CHUAN.md` | Luật chung mọi nhân vật |
 | `designs/QUY_TRINH_TAO_TUONG.md` | Quy trình tạo tướng – nói với Claude "tạo tướng <tên>" |
 | `shared/char_template/README.md` | Template nhân vật + cơ chế chung |
