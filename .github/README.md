@@ -40,7 +40,8 @@ Công cụ sinh hình/map (tuỳ chọn): Python 3 + `pip install pillow` – xe
 | `CLAUDE.md` | Quy tắc dự án (Claude đọc file này đầu tiên) |
 | `.github/CONTRIBUTING.md` | **Quy tắc nhánh, commit, Pull Request** – đọc trước khi đóng góp |
 | `designs/KHUNG_CHUAN.md` | Luật chung mọi nhân vật |
-| `designs/QUY_TRINH_TAO_TUONG.md` | Quy trình tạo tướng – nói với Claude "tạo tướng <tên>" |
+| `designs/QUY_TRINH_TAO_TUONG.md` | Quy trình tạo tướng – nói với Claude "tạo tướng <tên>" hoặc gõ `/tao-tuong <tên>` |
+| `.claude/` | Lệnh tắt `/tao-tuong` và agent `nghien-cuu-tuong` cho Claude Code |
 | `shared/char_template/README.md` | Template nhân vật + cơ chế chung |
 | `tools/README.md` | Công cụ sinh model test, map, chụp màn hình test |
 

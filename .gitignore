@@ -21,3 +21,5 @@
 !/save/config.ini
 /tools/preview/
 __pycache__/
+# Cài đặt cá nhân của Claude Code (không chia sẻ)
+.claude/settings.local.json
