@@ -32,15 +32,21 @@
 
 ### Phím điều khiển
 
-| Phím | Nút IKEMEN | Chức năng |
-|---|---|---|
-| W A S D | Up / Back / Down / Fwd | Di chuyển + hướng cho tổ hợp |
-| J | `a` | Đánh thường |
-| K | `b` | Nhảy |
-| L | `c` | Lướt (dash) |
-| U | `x` | Chiêu đặc biệt |
-| I | `y` | Tuyệt chiêu |
-| O | `z` | Trợ thủ (để dành) |
+**Quy định chung:** người chơi chỉ dùng **một trong hai bộ phím** dưới đây, không thêm phím nào khác
+(Enter / Numpad Enter chỉ để vào menu, tạm dừng). Nhân vật mới không được thiết kế chiêu cần phím ngoài bảng.
+
+| Người chơi 1 | Người chơi 2 | Nút IKEMEN | Chức năng |
+|---|---|---|---|
+| W A S D | ↑ ← ↓ → | Up / Back / Down / Fwd | Di chuyển + hướng cho tổ hợp |
+| J | Numpad 1 | `a` | Đánh thường |
+| K | Numpad 2 | `b` | Nhảy |
+| L | Numpad 3 | `c` | Lướt (dash) |
+| U | Numpad 4 | `x` | Chiêu đặc biệt |
+| I | Numpad 5 | `y` | Tuyệt chiêu |
+| O | Numpad 6 | `z` | Trợ thủ (để dành) |
+
+Nút phụ `d` / `w` của IKEMEN (đổi nhân vật chế độ Tag) để **Not used**. Cấu hình nằm ở `save/config.ini`.
+Bảng ký hiệu trong file thiết kế dùng phím của người chơi 1.
 
 - `S + J` = **giữ** S rồi bấm J. Ký hiệu `↓↘→ + U` = bấm lần lượt.
 - **⚠ Vấn đề phím nhảy (giải quyết 1 lần cho cả dự án, ngay nhân vật đầu tiên):** IKEMEN mặc định nhảy bằng Up (W).
@@ -128,7 +134,7 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 
 | Nhân vật | Thiết kế | Giai đoạn | Ghi chú |
 |---|---|---|---|
-| Nakroth | `designs/NAKROTH_DESIGN.md` (đã duyệt) | Đã dựng đủ chiêu bằng hình tạm KFM – chờ người dùng test | Load OK, có trong màn chọn. Còn: siêu giáp thật cho `I`, tạo `shared/char_template/` |
+| Nakroth | `designs/NAKROTH_DESIGN.md` (**v2 chờ duyệt**) | Code đang theo v1 (hình tạm KFM) | v2 làm lại cho đúng bộ chiêu Liên Quân. Duyệt xong mới sửa code |
 
 ## Lộ trình dự án
 - [ ] Nhân vật đầu tiên (Nakroth) chơi được hoàn chỉnh với hình tạm
@@ -143,9 +149,7 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 - Phím nhảy: **Phương án A** – K = nhảy, W chỉ là hướng. Cách làm: mỗi nhân vật đặt
   `AssertSpecial flag = NoJump, flag2 = NoAirJump` trong `[Statedef -2]` của `.cns`, và trong `.cmd`
   lệnh `"K"` (`command = b`) → `ChangeState 40` khi `statetype = S && ctrl` (xem `chars/nakroth/`).
-- Bàn phím trong `save/config.ini` (bản gốc engine dùng phím mũi tên + Z/X/C, đã đổi cho khớp bảng phím dự án):
-  - P1: W A S D + J K L U I O, Start = Enter (nút phụ d = Q, w = E).
-  - P2: phím mũi tên + Numpad 1–6 (a b c x y z), Start = Numpad Enter.
+- Bàn phím: chỉ 2 bộ phím (xem "Phím điều khiển"). Bản gốc engine dùng mũi tên + Z/X/C, đã đổi trong `save/config.ini`.
 
 ## Ghi chú
 - 60 tick = 1 giây.
