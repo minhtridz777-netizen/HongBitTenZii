@@ -6,6 +6,7 @@
 - **Claude**: biến ý tưởng thành bản thiết kế, viết toàn bộ file nhân vật, sửa theo nhận xét.
 - Engine: **IKEMEN GO bản Stable** (Windows 64-bit). Thư mục này là thư mục gốc của IKEMEN GO.
 - Giao tiếp với người dùng bằng **tiếng Việt**, ngắn gọn, dễ hiểu.
+- **Người dùng nói "tạo tướng <tên>" → làm đúng theo `designs/QUY_TRINH_TAO_TUONG.md`** (tự tra cứu, viết thiết kế, dừng ở các bước duyệt ✅).
 
 ---
 
@@ -15,7 +16,10 @@
 <gốc IKEMEN>/
 ├── CLAUDE.md                  ← file này (quy tắc chung toàn dự án)
 ├── designs/
+│   ├── KHUNG_CHUAN.md         ← luật chung cho mọi nhân vật (đã duyệt)
+│   ├── QUY_TRINH_TAO_TUONG.md ← quy trình "tạo tướng <tên>" từng bước
 │   ├── TEMPLATE_DESIGN.md     ← mẫu thiết kế nhân vật
+│   ├── ref/<tên>/             ← ảnh tham khảo người dùng tìm
 │   └── <TÊN>_DESIGN.md        ← bản thiết kế từng nhân vật (nguồn chuẩn)
 ├── shared/
 │   ├── char_template/         ← template: khung.cns (cơ chế chung, mọi tướng trỏ tới) + nhân vật mẫu "Mau" (xem README.md)
@@ -132,7 +136,7 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 
 ## Quy trình thêm một nhân vật mới
 
-Chi tiết ở `designs/KHUNG_CHUAN.md` mục 5. Các bước **in đậm** là chỗ người dùng duyệt:
+**Hướng dẫn đầy đủ từng bước: `designs/QUY_TRINH_TAO_TUONG.md`** (mẫu thiết kế: `designs/TEMPLATE_DESIGN.md`). Tóm tắt – các bước **in đậm** là chỗ người dùng duyệt:
 
 1. Người dùng lên ý tưởng → 2. Claude tra cứu → 3. Claude gợi ý bộ chiêu theo khung (chiêu bắt buộc + chiêu ẩn + nội tại),
    điền `TEMPLATE_DESIGN.md` thành `designs/<TÊN>_DESIGN.md` → **4. Duyệt thiết kế**

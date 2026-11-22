@@ -1,80 +1,86 @@
 # <TÊN NHÂN VẬT> – Bản thiết kế (v1)
 
-> Nguồn gốc / cảm hứng: <tự nghĩ ra, hoặc dựa trên nhân vật nào>
+> Nguồn gốc: <anime / game / tự nghĩ> – <tác phẩm gốc>
 > Lối chơi một câu: <vd: sát thủ song đao, lướt liên tục, máu mỏng>
-> Trạng thái: <Nháp / Đã duyệt>
+> Trạng thái: <Nháp – chờ duyệt / Đã duyệt / Đang dựng / Chờ test / Xong>
+> Thư mục: `chars/<ten>/` | Ảnh tham khảo: `designs/ref/<ten>/`
 
-Phím và khung lệnh chuẩn: xem `CLAUDE.md`. File này chỉ ghi phần riêng của nhân vật.
+Luật chung (phím, đỡ, thể lực, lướt, Bước Ma, thoát combo mặc định…): `designs/KHUNG_CHUAN.md`.
+File này chỉ ghi phần **riêng** của nhân vật. Quy trình: `designs/QUY_TRINH_TAO_TUONG.md`.
 
 ---
 
-## 1. Chỉ số
+## 0. Hồ sơ tra cứu
+| Mục | Nội dung |
+|---|---|
+| Tác phẩm / vai trò | |
+| Tính cách, phong cách chiến đấu | |
+| Vũ khí / năng lực | |
+| Dáng người | nhỏ / thường / to con, có vũ khí dài, biết bay… |
+| Màu chủ đạo | màu chính, màu phụ, màu hiệu ứng |
+| Kỹ năng nổi tiếng (gốc) | liệt kê, kèm mô tả ngắn |
+| Chiêu cuối / biến hình | |
 
+Nguồn: <link 1>, <link 2>…
+
+## 1. Chỉ số
 | Chỉ số | Giá trị | Ghi chú |
 |---|---|---|
-| Máu | | chuẩn 1000 |
-| Tấn công | | chuẩn 100 |
-| Phòng thủ | | chuẩn 100 |
-| Tốc độ đi | | so với KFM |
-| Lướt (L) | | ngắn/xa, nhanh/chậm |
+| Máu | | chuẩn 1000 (800–1200) |
+| Tấn công / Phòng thủ | | chuẩn 100 / 100 |
+| Tốc độ đi, lướt | | so với nhân vật mẫu |
 | Điểm mạnh | | |
-| Điểm yếu | | |
+| **Điểm yếu** | | bắt buộc có nếu đánh đau |
 
 ## 2. Đánh thường
-
 | Lệnh | Tên | Mô tả | Sát thương |
 |---|---|---|---|
-| `J` (chuỗi) | | số nhát, nhát cuối làm gì | |
-| `W + J` | | | |
+| `J` (chuỗi 3–5 nhát) | | nhát cuối làm gì | 20–50 mỗi nhát |
+| `W + J` | | đòn hất lên | |
 | `S + J` | | | |
-| `J` (trên không) | | | |
+| `J` (trên không) | | 1–2 nhát | |
 
-## 3. Chiêu đặc biệt (miễn phí)
-
-### `U` – <tên>
-- Mô tả:
-- Cơ chế đặc biệt (tái kích hoạt, giữ phím, đạn…):
-- Sát thương:
-
-### `S + U` – <tên>
-- Mô tả:
-- Sát thương:
-
-### `W + U` – <tên>
-- Mô tả:
-- Sát thương:
-
-### `U` (trên không) – <tên>
-- Mô tả:
-- Sát thương:
+## 3. Chiêu U (miễn phí, có thể hồi chiêu)
+| Lệnh | Tên (lấy từ kỹ năng gốc nào) | Mô tả, cơ chế đặc biệt | Sát thương |
+|---|---|---|---|
+| `U` | | | 50–100 |
+| `W + U` | | | |
+| `S + U` | | | |
+| `U` (trên không) | | | |
+| `A/D + U` (tùy chọn) | | | |
 
 ## 4. Tuyệt chiêu
+| Lệnh | Tên | Mô tả, hiệu ứng (siêu giáp, bất tử, super pause…) | Sát thương |
+|---|---|---|---|
+| `I` (1 thanh) | | | 180–250 |
+| `W + I` (1 thanh) | | | 180–250 |
+| `S + I` (3 thanh) | | điều kiện diễn tiếp (trúng nhát đầu?) | 330–420 |
 
-### `I` – <tên> (1 thanh)
-- Mô tả:
-- Hiệu ứng đặc biệt (siêu giáp, bất tử, super pause…):
-- Tổng sát thương:
+## 5. Thoát combo (S + L, 1 thanh)
+- Hình thức: <mặc định "biến mất ra sau lưng" hoặc kiểu riêng: thế thân, nổ, lộn…>
 
-### `S + I` – <tên> (3 thanh)
-- Mô tả:
-- Điều kiện ra đòn (trúng nhát đầu mới diễn tiếp?…):
-- Tổng sát thương:
-
-## 5. Nội tại
+## 6. Nội tại
 -
 
-## 6. Combo để kiểm tra
+## 7. Chiêu ẩn (1–3)
+| Cách kích hoạt | Hiệu ứng |
+|---|---|
+| | |
 
+## 8. Combo để kiểm tra
 | # | Combo | Kiểm tra điều gì |
 |---|---|---|
 | 1 | | |
 | 2 | | |
 | 3 | | |
+| 4 | | |
 
-## 7. Hình ảnh
-- Hình tạm:
-- Màu chủ đạo hiệu ứng:
-- Sprite thật: <chưa có / nguồn>
+## 9. Hình ảnh
+| Mục | Nội dung |
+|---|---|
+| Model test | màu chính R,G,B – màu phụ R,G,B; có cần biến thể (vũ khí, to con, bay)? |
+| Hiệu ứng tối giản | màu, hình dạng (vệt chém, cầu năng lượng, tia…) |
+| Model chuẩn | <chưa vẽ / đã duyệt> – dựa trên ảnh trong `designs/ref/<ten>/` |
 
-## 8. Ghi chú thay đổi
+## 10. Ghi chú thay đổi
 - v1: bản đầu
