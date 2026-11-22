@@ -41,6 +41,14 @@
 
 ## Chuẩn chung cho MỌI nhân vật
 
+> **Nguồn chuẩn đầy đủ: `designs/KHUNG_CHUAN.md`** (đã duyệt): tỉ lệ hình, phím, cơ chế chung, bộ chiêu bắt buộc, quy trình.
+> Phần dưới đây là tóm tắt; mâu thuẫn thì theo KHUNG_CHUAN.md.
+
+### Hình ảnh
+- Game 1280×720, hệ toạ độ **640×360** cho cả nhân vật và map. Nhân vật cao ~70 px (≈1/5 màn hình), ít chi tiết, hiệu ứng đẹp.
+- Map rộng 2–3 màn hình, có bậc lơ lửng (code chung `shared/system/platforms.zss`, map khai báo bậc ở `[Constants]`).
+- Camera giữa 2 nhân vật, xa nhau thì thu nhỏ.
+
 ### Phím điều khiển
 
 **Quy định chung:** người chơi chỉ dùng **một trong hai bộ phím** dưới đây, không thêm phím nào khác
@@ -48,10 +56,12 @@
 
 | Người chơi 1 | Người chơi 2 | Nút IKEMEN | Chức năng |
 |---|---|---|---|
-| W A S D | ↑ ← ↓ → | Up / Back / Down / Fwd | Di chuyển + hướng cho tổ hợp |
+| W | ↑ | Up | Bấm riêng **không làm gì**, chỉ dùng trong tổ hợp |
+| S | ↓ | Down | **Giữ = đỡ** (đứng yên, A/D đổi hướng đỡ). S + K trên bậc = xuống bậc |
+| A D | ← → | Back / Fwd | Đi trái / phải |
 | J | Numpad 1 | `a` | Đánh thường |
-| K | Numpad 2 | `b` | Nhảy |
-| L | Numpad 3 | `c` | Lướt (dash) |
+| K | Numpad 2 | `b` | Nhảy (nhảy đôi khi đang bay) |
+| L | Numpad 3 | `c` | Lướt đất / trên không (tốn thể lực) |
 | U | Numpad 4 | `x` | Chiêu đặc biệt |
 | I | Numpad 5 | `y` | Tuyệt chiêu |
 | O | Numpad 6 | `z` | Trợ thủ (để dành) |
@@ -60,21 +70,27 @@ Nút phụ `d` / `w` của IKEMEN (đổi nhân vật chế độ Tag) để **N
 Bảng ký hiệu trong file thiết kế dùng phím của người chơi 1.
 
 - `S + J` = **giữ** S rồi bấm J. Ký hiệu `↓↘→ + U` = bấm lần lượt.
-- **⚠ Vấn đề phím nhảy (giải quyết 1 lần cho cả dự án, ngay nhân vật đầu tiên):** IKEMEN mặc định nhảy bằng Up (W).
-  - Phương án A (ưu tiên): K = nhảy, W chỉ là phím hướng. Tìm cách tắt nhảy bằng Up.
-  - Phương án B (dự phòng): W = nhảy kiểu Mugen, K là nhảy phụ. Hỏi người dùng trước khi chọn B.
-  - Ghi kết quả vào mục "Quyết định đã chốt" bên dưới.
+- Không có cúi người, không đỡ bằng cách giữ lùi kiểu Mugen. Không đỡ được trên không.
+- Nhảy bằng K, đã tắt nhảy bằng W (xem "Quyết định đã chốt").
+
+### Cơ chế chung (mọi nhân vật, nằm trong template)
+- **Đỡ (giữ S):** chặn mọi đòn từ phía trước mặt; bị đánh sau lưng thì trúng đòn.
+- **Thể lực** (thanh chung cho đỡ và lướt, tối đa 100): lướt −25; đỡ trúng đòn −(sát thương ÷ 4); hồi khi không đỡ không lướt;
+  đang giữ S thì không hồi; hết thể lực khi đang đỡ → vỡ thế (choáng ~1 giây). Số liệu mặc định, chỉnh khi test.
+- **Thoát combo (S + L)** khi đang trúng đòn: tốn 1 thanh năng lượng, hình thức thoát tùy tướng.
+- **Nhảy đôi, lướt trên không**, lên/xuống bậc.
 
 ### Bộ khung lệnh chuẩn
 Mọi nhân vật dùng cùng khung để người chơi đổi nhân vật không phải học lại:
 
 | Nhóm | Lệnh |
 |---|---|
-| Đánh thường | `J` (chuỗi), `W+J`, `S+J`, `J` trên không |
-| Chiêu (miễn phí) | `U`, `S+U`, `W+U`, `U` trên không (có thể thêm `A/D+U`) |
-| Tuyệt chiêu cấp 1 | `I` – tốn 1 thanh (1000 power) |
-| Tuyệt chiêu cấp 3 | `S+I` – tốn 3 thanh (3000 power) |
+| Đánh thường | `J` (chuỗi 3–5 nhát), `W+J` (hất), `S+J` (tùy tướng), `J` trên không |
+| Chiêu (miễn phí, có thể hồi chiêu) | `U`, `W+U`, `S+U`, `U` trên không (có thể thêm `A/D+U`) |
+| Tuyệt chiêu | `I` – 1 thanh, `W+I` – 1 thanh, `S+I` – 3 thanh |
+| Thoát combo | `S+L` – 1 thanh |
 | Nội tại | Tùy nhân vật, không cần phím |
+| Chiêu ẩn | 1–3 tổ hợp đặc biệt mỗi tướng (khuyến khích) |
 
 Năng lượng tối đa: 3000 (3 thanh).
 
@@ -84,12 +100,14 @@ Năng lượng tối đa: 3000 (3 thanh).
 |---|---|
 | 0–199 | State chung (đứng, đi, nhảy, bị đánh…) – theo chuẩn Mugen |
 | 200–299 | Đánh thường đứng (chuỗi J, W+J) |
-| 400–499 | Đánh thường ngồi (S+J) |
+| 400–499 | S + J |
 | 600–699 | Đánh thường trên không |
-| 700–799 | Lướt (L) |
+| 700–799 | Lướt đất / trên không, nhảy đôi |
+| 800–899 | Cơ chế chung: đỡ, vỡ thế, thoát combo |
 | 1000–1999 | Chiêu đặc biệt U |
-| 3000–3999 | Tuyệt chiêu cấp 1 (I) |
-| 4000–4999 | Tuyệt chiêu cấp 3 (S+I) |
+| 3000–3499 | Tuyệt chiêu `I` |
+| 3500–3999 | Tuyệt chiêu `W + I` |
+| 4000–4999 | Tuyệt chiêu `S + I` |
 | 8000–8999 | Helper, hiệu ứng, đạn |
 
 - Biến: `var(0)–var(9)` để cho hệ thống chung (thời gian tái kích hoạt, cường hóa, nội tại…), `var(10)` trở lên tùy nhân vật. Ghi chú công dụng từng biến ở đầu file `.cns`.
@@ -101,8 +119,8 @@ Năng lượng tối đa: 3000 (3 thanh).
 | Máu | 800–1200 (chuẩn 1000) |
 | Đòn J lẻ | 20–50 |
 | Chiêu U | 50–100 |
-| Tuyệt chiêu cấp 1 | 180–250 |
-| Tuyệt chiêu cấp 3 | 330–420 |
+| Tuyệt chiêu `I`, `W+I` (1 thanh) | 180–250 |
+| Tuyệt chiêu `S+I` (3 thanh) | 330–420 |
 
 Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm, tầm ngắn…).
 
@@ -110,12 +128,15 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 
 ## Quy trình thêm một nhân vật mới
 
-1. **Thiết kế:** người dùng đưa ý tưởng (có thể chỉ vài dòng). Claude tìm hiểu thêm nếu là nhân vật có sẵn, điền `TEMPLATE_DESIGN.md` thành `designs/<TÊN>_DESIGN.md`. **Người dùng duyệt** rồi mới làm.
-2. **Dựng bằng hình tạm:** copy từ `shared/char_template/` (nếu đã có), không thì tham khảo KFM. Thứ tự: chỉ số + di chuyển + lướt → đánh thường → chiêu U → nội tại → tuyệt chiêu.
-3. **Kiểm tra kỹ thuật:** nhân vật load được, không lỗi log, có trong màn chọn.
-4. **Người dùng test** theo danh sách combo trong bản thiết kế → nhận xét → chỉnh.
-5. **Hình ảnh thật + hiệu ứng + âm thanh** (khi người dùng có sprite).
-6. **Cập nhật bảng Roster** bên dưới và commit.
+Chi tiết ở `designs/KHUNG_CHUAN.md` mục 5. Các bước **in đậm** là chỗ người dùng duyệt:
+
+1. Người dùng lên ý tưởng → 2. Claude tra cứu → 3. Claude gợi ý bộ chiêu theo khung (chiêu bắt buộc + chiêu ẩn + nội tại),
+   điền `TEMPLATE_DESIGN.md` thành `designs/<TÊN>_DESIGN.md` → **4. Duyệt thiết kế**
+5. Dựng bằng **model test** + hiệu ứng tối giản (copy `shared/char_template/`), chạy được trong LAB, không lỗi →
+   **6. Duyệt lối chơi** (người dùng test trong LAB, nhận xét, chỉnh)
+7. Claude vẽ model chuẩn (chấp nhận ~60% chất lượng mẫu) → **8. Duyệt hình**
+9. Vẽ hiệu ứng chiêu thức → 10. Âm thanh, AI máy đánh, cân bằng, ảnh đại diện, danh sách chiêu →
+   **11. Duyệt cuối** → cập nhật Roster, commit
 
 ### Làm nhiều nhân vật cùng lúc
 - Mỗi nhân vật nằm gọn trong thư mục riêng, **không sửa nhân vật này khi đang làm nhân vật khác**.
@@ -145,11 +166,14 @@ Nhân vật "đánh đau" thì phải có điểm yếu rõ (máu thấp, chậm
 
 | Nhân vật | Thiết kế | Giai đoạn | Ghi chú |
 |---|---|---|---|
-| Nakroth | `designs/NAKROTH_DESIGN.md` (v2 đã duyệt) | Đã dựng v2 (hình tạm KFM + vệt chém tự vẽ) – chờ test | Load OK, trận AI-đấu-AI chạy không lỗi. Cần kiểm tra siêu giáp `I` |
+| Nakroth | `designs/NAKROTH_DESIGN.md` | **Bỏ** – làm theo khung cũ | Sẽ xoá khỏi dự án khi làm template (còn trong lịch sử git) |
 
 ## Lộ trình dự án
-- [ ] Nhân vật đầu tiên (Nakroth) chơi được hoàn chỉnh với hình tạm
-- [ ] Chốt phím nhảy + tạo `shared/char_template/`
+- [x] Chốt phím nhảy (K), LAB, thử bậc + camera (map `lab_bac`)
+- [x] Khung chuẩn (`designs/KHUNG_CHUAN.md`)
+- [ ] Model test (búp bê khớp nối ~70 px) + `shared/char_template/` có đủ cơ chế chung, chạy trong LAB
+- [ ] Map đầu tiên theo tỉ lệ mới (640×360, có bậc)
+- [ ] Nhân vật đầu tiên theo quy trình mới
 - [ ] Thêm nhân vật 2–4 (dùng template)
 - [ ] Sprite thật, hiệu ứng, âm thanh
 - [ ] Màn chơi (stage), giao diện, chế độ chơi

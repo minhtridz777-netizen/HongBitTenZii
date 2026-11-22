@@ -1,4 +1,4 @@
-# KHUNG CHUẨN – luật chung cho mọi nhân vật (bản nháp, CHỜ DUYỆT)
+# KHUNG CHUẨN – luật chung cho mọi nhân vật (đã duyệt)
 
 > Mọi nhân vật dùng chung khung này. Bản thiết kế từng nhân vật chỉ ghi phần **riêng** (chiêu, nội tại, chiêu ẩn).
 > Duyệt xong sẽ chép phần cốt lõi vào `CLAUDE.md` và làm `shared/char_template/` theo đúng khung.
@@ -44,9 +44,11 @@ Bỏ khỏi khung chuẩn: **cúi người**, **đỡ bằng cách giữ lùi** 
 - Giữ S: nhân vật đứng yên, đỡ **mọi đòn từ phía trước mặt** (không phân đỡ cao/thấp).
 - A / D khi đang giữ S: quay mặt đổi hướng đỡ.
 - Bị đánh **từ sau lưng** khi đang đỡ → trúng đòn bình thường.
-- Đỡ trên không: *chưa chốt* (đề xuất: không đỡ được trên không).
+- **Không đỡ được trên không.**
 
 ### 3.2 Thể lực (thanh chung cho đỡ và lướt)
+Các con số dưới đây là mặc định, chỉnh sau khi test.
+
 | Việc | Thể lực |
 |---|---|
 | Tối đa | 100 |
@@ -57,7 +59,7 @@ Bỏ khỏi khung chuẩn: **cúi người**, **đỡ bằng cách giữ lùi** 
 
 ### 3.3 Thoát combo – S + L
 - Đang bị đánh (trúng đòn), bấm S + L → thoát ra (biến mất / lộn / dịch chuyển…) – **hình thức tùy tướng**.
-- Giá mặc định: **1 thanh năng lượng (1000)**. Tướng có thể đổi giá trong thiết kế riêng.
+- Giá: **1 thanh năng lượng (1000)**.
 - Có vài tick bất tử sau khi thoát. Không dùng được khi đang nằm đất.
 
 ### 3.4 Di chuyển
@@ -78,7 +80,9 @@ Bỏ khỏi khung chuẩn: **cúi người**, **đỡ bằng cách giữ lùi** 
 | | `S + J` | đòn riêng (quét chân, đâm, phá đỡ… tùy tướng) |
 | | `J` trên không | 1–2 nhát |
 | Chiêu U (miễn phí, có thể hồi chiêu) | `U`, `W + U`, `S + U`, `U` trên không | 4 chiêu; có thể thêm `A/D + U` |
-| Tuyệt chiêu | `I` (1 thanh), `S + I` (3 thanh) | `W + I` để dành cho tướng đặc biệt |
+| Tuyệt chiêu | `I` – 1 thanh (1000) | |
+| | `W + I` – 1 thanh (1000) | tuyệt chiêu cấp 1 thứ hai |
+| | `S + I` – 3 thanh (3000) | tuyệt chiêu mạnh nhất |
 | Thoát combo | `S + L` | hình thức tùy tướng |
 | Nội tại | không cần phím | mỗi tướng 1 nội tại |
 
@@ -110,16 +114,27 @@ Số animation theo quy ước → khi thay model chuẩn không phải sửa lo
 
 ---
 
-## 6. Giữ nguyên từ trước
-- Quy ước đánh số state/anim, quy ước biến (`var(0)–var(9)` hệ thống, `var(10)+` riêng), thang cân bằng.
+## 6. Đánh số state / anim
+
+| Khoảng số | Dùng cho |
+|---|---|
+| 0–199 | State chung (đứng, đi, nhảy, bị đánh…) – theo chuẩn Mugen |
+| 200–299 | Đánh thường đứng (chuỗi J, W+J) |
+| 400–499 | S + J |
+| 600–699 | Đánh thường trên không |
+| 700–799 | Lướt đất và trên không, nhảy đôi |
+| 800–899 | Cơ chế chung: đỡ (S), vỡ thế, thoát combo (S+L) |
+| 1000–1999 | Chiêu U |
+| 3000–3499 | Tuyệt chiêu `I` |
+| 3500–3999 | Tuyệt chiêu `W + I` |
+| 4000–4999 | Tuyệt chiêu `S + I` |
+| 8000–8999 | Helper, hiệu ứng, đạn |
+
+Giữ nguyên: quy ước biến (`var(0)–var(9)` hệ thống, `var(10)+` riêng), thang cân bằng
+(tuyệt chiêu `W + I` dùng cùng khoảng sát thương với `I`: 180–250).
+
+## 6b. Giữ nguyên từ trước
 - K = nhảy (tắt nhảy bằng W), LAB, Bù Nhìn (sẽ đổi sang model test).
 
 ## 7. Bỏ
 - Nakroth (bỏ hẳn, vẫn còn trong lịch sử git nếu cần xem lại), hình KFM.
-
----
-
-## Còn cần chốt
-1. Đỡ được trên không không? (đề xuất: không)
-2. Các con số thể lực ở mục 3.2 – để mặc định rồi chỉnh khi test?
-3. Giá thoát combo mặc định 1 thanh năng lượng – được không?
