@@ -1,0 +1,154 @@
+; Map thu nghiem LAB: rong 3 man hinh, 6 bac lo lung (sinh bang tools/gen_stage_lab.py)
+; Bac: khai bao o [Constants], xu ly boi shared/system/platforms.zss
+
+[Info]
+name = "Lab Bac"
+displayname = "Lab Bac"
+mugenversion = 1.0
+author = "MugenFake"
+
+[Constants]
+plat.count = 6
+plat1.x1 = -300
+plat1.x2 = -210
+plat1.y = -28
+plat2.x1 = -190
+plat2.x2 = -90
+plat2.y = -56
+plat3.x1 = -50
+plat3.x2 = 30
+plat3.y = -88
+plat4.x1 = 60
+plat4.x2 = 160
+plat4.y = -40
+plat5.x1 = 190
+plat5.x2 = 290
+plat5.y = -28
+plat6.x1 = 320
+plat6.x2 = 420
+plat6.y = -60
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -320
+boundright = 320
+boundhigh = -70
+boundlow = 0
+verticalfollow = .6
+floortension = 20
+tension = 60
+autocenter = 1
+zoomout = .8
+zoomin = 1
+overdrawhigh = 0
+overdrawlow = 0
+cuthigh = 0
+cutlow = 0
+
+[PlayerInfo]
+p1startx = 100
+p1starty = 0
+p1facing = 1
+p2startx = 250
+p2starty = -28
+p2facing = -1
+leftbound = -470
+rightbound = 470
+
+[Bound]
+screenleft = 10
+screenright = 10
+
+[StageInfo]
+zoffset = 160
+autoturn = 1
+resetBG = 1
+localcoord = 320, 180
+xscale = 1
+yscale = 1
+
+[Shadow]
+intensity = 80
+color = 0,0,0
+yscale = .25
+
+[Reflection]
+intensity = 0
+
+[Music]
+bgmusic =
+
+[BGdef]
+spr = lab_bac.sff
+debugbg = 0
+
+[BG Troi]
+type = normal
+spriteno = 0, 0
+start = 0, -140
+delta = .05, .2
+tile = 1, 0
+
+[BG Doi xa]
+type = normal
+mask = 1
+spriteno = 1, 0
+start = -480, 70
+delta = .3, .3
+
+[BG Doi gan]
+type = normal
+mask = 1
+spriteno = 2, 0
+start = -480, 105
+delta = .6, .6
+
+[BG Dat]
+type = normal
+mask = 1
+spriteno = 3, 0
+start = -480, 158
+delta = 1, 1
+
+[BG Bac 1]
+type = normal
+mask = 1
+spriteno = 10, 0
+start = -300, 132
+delta = 1, 1
+
+[BG Bac 2]
+type = normal
+mask = 1
+spriteno = 11, 0
+start = -190, 104
+delta = 1, 1
+
+[BG Bac 3]
+type = normal
+mask = 1
+spriteno = 12, 0
+start = -50, 72
+delta = 1, 1
+
+[BG Bac 4]
+type = normal
+mask = 1
+spriteno = 13, 0
+start = 60, 120
+delta = 1, 1
+
+[BG Bac 5]
+type = normal
+mask = 1
+spriteno = 14, 0
+start = 190, 132
+delta = 1, 1
+
+[BG Bac 6]
+type = normal
+mask = 1
+spriteno = 15, 0
+start = 320, 100
+delta = 1, 1

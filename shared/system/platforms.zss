@@ -1,0 +1,65 @@
+# ==============================================================================
+# BẬC / NỀN TẢNG dùng chung cho MỌI nhân vật (MugenFake)
+# Nạp qua save/config.ini -> [Common] States. Chạy mỗi tick cho từng nhân vật (StateDef -4).
+#
+# Map khai báo trong [Constants] của file .def (đơn vị = toạ độ của map):
+#   plat.count = N                 ; số bậc (tối đa 8)
+#   plat1.x1 = -300                ; mép trái (x của map, 0 = giữa map)
+#   plat1.x2 = -210                ; mép phải
+#   plat1.y  = -28                 ; độ cao mặt trên (âm = cao hơn mặt đất)
+#
+# Cách hoạt động (dùng GroundLevelOffset của IKEMEN):
+#   - Đang rơi / đứng mà chân ở trên mặt bậc -> mặt bậc thành "mặt đất" của nhân vật.
+#   - Nhảy từ dưới lên xuyên qua bậc được (bậc một chiều).
+#   - Đi ra khỏi mép bậc -> rơi xuống.
+#   - Đứng trên bậc, giữ S + bấm K -> xuống bậc (rơi xuyên qua 12 tick).
+# ==============================================================================
+
+# Trả về độ cao mặt đất mới: bậc gần nhất nằm dưới chân (nhỏ nhất trong các bậc mà chân đang ở trên)
+[Function MF_PlatPick(x1, x2, py, ax, ay, best) ret]
+let ret = $best;
+if $x1 < $x2 && $ax >= $x1 && $ax <= $x2 && $ay <= $py + 1 && $py < $ret {
+	let ret = $py;
+}
+
+[StateDef -4]
+
+ignoreHitPause if !isHelper && stageConst(plat.count) > 0 {
+	# vị trí tuyệt đối của chân (Pos Y tính theo mặt đất hiện tại nên phải cộng GroundLevel)
+	let ax = pos x + cameraPos x;
+	let ay = pos y + groundLevel;
+
+	if map(_mf_platDrop) > 0 {
+		mapAdd{map: "_mf_platDrop"; value: -1}
+	}
+
+	let best = 0;
+	if map(_mf_platDrop) <= 0 {
+		let best = call MF_PlatPick(stageConst(plat1.x1), stageConst(plat1.x2), stageConst(plat1.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat2.x1), stageConst(plat2.x2), stageConst(plat2.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat3.x1), stageConst(plat3.x2), stageConst(plat3.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat4.x1), stageConst(plat4.x2), stageConst(plat4.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat5.x1), stageConst(plat5.x2), stageConst(plat5.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat6.x1), stageConst(plat6.x2), stageConst(plat6.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat7.x1), stageConst(plat7.x2), stageConst(plat7.y), $ax, $ay, $best);
+		let best = call MF_PlatPick(stageConst(plat8.x1), stageConst(plat8.x2), stageConst(plat8.y), $ax, $ay, $best);
+	}
+
+	# Đứng trên bậc + giữ S + bấm K -> xuống bậc
+	if $best < 0 && stateType != A && ctrl && $ay >= $best - 1 && inputTime(D) > 0 && inputTime(b) = 1 {
+		map(_mf_platDrop) := 12;
+		let best = 0;
+		velSet{x: 0; y: 0}
+		selfState{value: 50; ctrl: 1}
+	}
+
+	groundLevelOffset{value: $best}
+
+	# Đi ra khỏi mép bậc khi đang đứng / đi / đỡ -> rơi xuống
+	if stateType != A && $ay < $best - 1 {
+		if stateNo = 0 || stateNo = 20 || stateNo = [10, 12] || stateNo = [120, 155] || stateNo = 52 {
+			velSet{y: 0}
+			selfState{value: 50; ctrl: 1}
+		}
+	}
+}

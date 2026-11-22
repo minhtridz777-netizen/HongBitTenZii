@@ -48,22 +48,39 @@ def capture(h):
     gdi32.DeleteObject(bmp); gdi32.DeleteDC(mdc); user32.ReleaseDC(h, hdc)
     return Image.frombuffer('RGB', (w, hh), buf, 'raw', 'BGRX', 0, 1)
 
-KEYS = [(float(a), b) for a, b in (k.split(':') for k in os.environ.get('SHOT_KEYS', '').split(',') if k)]
-VK = {'J': (0x4A, 0x24), 'ENTER': (0x0D, 0x1C), 'ESC': (0x1B, 0x01)}
-def press(h, name):
+# SHOT_KEYS="giay:PHIM[:giu_bao_lau]" cach nhau dau phay. Ghep phim bang '+', vd "8:S+K", "5:D:1.5" (giu D 1.5 giay)
+VK = {'J': (0x4A, 0x24), 'K': (0x4B, 0x25), 'L': (0x4C, 0x26), 'U': (0x55, 0x16), 'I': (0x49, 0x17),
+      'W': (0x57, 0x11), 'A': (0x41, 0x1E), 'S': (0x53, 0x1F), 'D': (0x44, 0x20),
+      'ENTER': (0x0D, 0x1C), 'ESC': (0x1B, 0x01)}
+KEYS = []
+for k in os.environ.get('SHOT_KEYS', '').split(','):
+    if not k:
+        continue
+    parts = k.split(':')
+    t, names = float(parts[0]), parts[1].split('+')
+    dur = float(parts[2]) if len(parts) > 2 else 0.12
+    KEYS.append((t, 'down', names))
+    KEYS.append((t + dur, 'up', names))
+
+def key_msg(h, name, down):
     vk, sc = VK[name]
-    user32.PostMessageW(h, 0x0100, vk, 1 | (sc << 16))
-    time.sleep(0.12)
-    user32.PostMessageW(h, 0x0101, vk, 1 | (sc << 16) | (3 << 30))
+    if down:
+        user32.PostMessageW(h, 0x0100, vk, 1 | (sc << 16))
+    else:
+        user32.PostMessageW(h, 0x0101, vk, 1 | (sc << 16) | (3 << 30))
 
 t0 = time.time()
-events = sorted([(d, 'shot', i) for i, d in enumerate(delays)] + [(d, 'key', k) for d, k in KEYS])
+events = sorted([(d, 'shot', i) for i, d in enumerate(delays)] + [(d, a, n) for d, a, n in KEYS],
+                key=lambda e: (e[0], 0 if e[1] == 'shot' else 1))
 for d, kind, arg in events:
     while time.time() - t0 < d:
-        time.sleep(0.05)
-    if kind == 'key':
+        time.sleep(0.02)
+    if kind in ('down', 'up'):
         h = find_window(p.pid)
-        if h: press(h, arg); print('key', arg, 'at', d)
+        if h:
+            for n in arg:
+                key_msg(h, n, kind == 'down')
+                time.sleep(0.03)
         continue
     i = arg
     while time.time() - t0 < d:

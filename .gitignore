@@ -8,7 +8,9 @@
 /external/mods/*
 !/external/mods/lab.lua
 /font/
-/stages/
+/stages/*
+!/stages/lab_bac.def
+!/stages/lab_bac.sff
 /video/
 /sound/
 /chars/kfm*/

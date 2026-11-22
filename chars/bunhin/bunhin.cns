@@ -15,13 +15,14 @@ IntPersistIndex = 60
 FloatPersistIndex = 40
 
 [Size]
-xscale = 1
-yscale = 1
-ground.back = 15
-ground.front = 16
-air.back = 12
-air.front = 12
-height = 60
+; TẠM THỜI thu nhỏ 0.5 để thử tỉ lệ nhân vật nhỏ trên map (sẽ thay bằng model test)
+xscale = .5
+yscale = .5
+ground.back = 8
+ground.front = 8
+air.back = 6
+air.front = 6
+height = 30
 attack.dist = 160
 proj.attack.dist = 90
 proj.doscale = 0
